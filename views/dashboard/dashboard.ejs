@@ -1,0 +1,16 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+<h1>Dashboard</h1>
+<section class="dashboard">
+    <p>Welcome to your dashboard! Here you can manage your projects.</p>
+</section>
+<section class="profile" id="cardbox">
+    <div>
+        <img src="<%= user.avatar %>" alt="Profile Picture" class="profile-picture">
+        <h2>Hello, <%= user.name %></h2>
+    </div>
+    <div>
+        <button class="btn">Log out</button>
+        <button class="btn">Profile Settings</button>
+    </div>
+</section>
