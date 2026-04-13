@@ -10,17 +10,20 @@ app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-app.get('/', (req, res) => {
+app.get('/dashboard', (req, res) => {
     // TODO: If user is not logged in, redirect to login page.
     // We gonna redirect if we have authentication implemented.
     res.render('dashboard/dashboard', { 
-        user: { 
-            name: 'John Doe', 
-            email: 'john.doe@example.com',
-            avatar: '/images/default-avatar.png' 
-            } 
+        data: require('./testdata.json'),
         });
+        // api routes: GET profile, GET team
 });
+
+app.get('/login', (req, res) => {
+    res.render('authenticate/login');
+});
+
+
 
 app.listen(port, () => {
 console.log(`Server running at http://localhost:${port}`);

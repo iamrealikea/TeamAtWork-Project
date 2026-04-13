@@ -1,16 +1,26 @@
 <%- include("../partials/header") %>
 <%- include("../partials/navigation") %>
-<h1>Dashboard</h1>
-<section class="dashboard">
+
+<section>
+    <h1>Dashboard</h1>
     <p>Welcome to your dashboard! Here you can manage your projects.</p>
 </section>
-<section class="profile" id="cardbox">
+<section class="cardbox" id="profile">
     <div>
-        <img src="<%= user.avatar %>" alt="Profile Picture" class="profile-picture">
-        <h2>Hello, <%= user.name %></h2>
+        <img src="<%= data.users[0].avatar %>" alt="Profile Picture" class="profile-picture">
+        <h2>Hello, <%= data.users[0].name %></h2>
     </div>
     <div>
-        <button class="btn">Log out</button>
+        <button class="btn">Log Out</button>
         <button class="btn">Profile Settings</button>
     </div>
+</section>
+<section class="cardbox" id="recent-teams">
+    <h2>Recent Team</h2>
+    <% data.teams.forEach(team => { %>
+        <div id="team-card">
+            <h3><%= team.name %></h3>
+            <p>Members: <%= team.members.length %></p>
+        </div>
+    <% }) %>
 </section>
