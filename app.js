@@ -2,14 +2,18 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+app.get('/', (req, res) => {
+    //TODO: First page or redirect to dashboard if user is logged in.
+});
 app.get('/dashboard', (req, res) => {
     // TODO: If user is not logged in, redirect to login page.
     // We gonna redirect if we have authentication implemented.
@@ -23,7 +27,8 @@ app.get('/login', (req, res) => {
     res.render('authenticate/login');
 });
 
-
+const userRoutes = require('./routes/userRoute');
+app.use('/api/users', userRoutes);
 
 app.listen(port, () => {
 console.log(`Server running at http://localhost:${port}`);
