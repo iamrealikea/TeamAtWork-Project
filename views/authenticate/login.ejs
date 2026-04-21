@@ -3,14 +3,20 @@
 <section class="cardbox" id="login-container">
     <h1>Login</h1>
     <p>Welcome back! Please log in to your account.</p>
+
+    <% if (error) { %>
+        <p class="error-message"><%= error %></p>
+    <% } %>
+
     <form action="/login" method="POST">
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
+        <input type="email" id="email" name="email" value="<%= values?.email%>" required>
         
         <label for="password">Password</label>
         <input type="password" id="password" name="password" required>
         
-        <button type="submit" class="btn">Log In</button>
-        <button type="button" class="btn" id="signupBtn">Sign Up</button>
+        <button type="submit" class="btn" id="login-btn">Log In</button>
+        <button type="button" class="btn" id="signup-btn">Sign Up</button>
     </form>
 </section>
+<%- include("../partials/footer") %>
