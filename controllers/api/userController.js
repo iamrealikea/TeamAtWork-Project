@@ -3,6 +3,12 @@ const path = require('path');
 const fs = require('fs');
 const { AVATAR_DIR } = require('../../config/multer');
 
+// GET /users
+exports.getAllUsers = async (req, res) => {
+  const users = await User.getAll();
+  res.json(users);
+}
+
 // GET /users/:id
 exports.getMe = async (req, res) => {
   const user = await User.getById(req.params.id)
