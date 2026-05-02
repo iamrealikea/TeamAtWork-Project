@@ -1,18 +1,25 @@
 const express = require('express')
 const router = express.Router()
-const controller = require('../controllers/team.controller')
-const auth = require('../middleware/auth')
+const controller = require('../../controllers/api/teamController')
+const assignController = require('../../controllers/api/assignmentController')
+const { requireAuth } = require('../../middleware/authMiddleware')
+const { fileUpload } = require('../../config/multer')
+
+router.use(requireAuth)
 
 // team
-router.get('/teams', auth, controller.getTeams)
-router.get('/teams/:teamId', auth, controller.getTeamById)
-router.post('/teams', auth, controller.createTeam)
-router.patch('/teams/:teamId', auth, controller.updateTeam)
-router.delete('/teams/:teamId', auth, controller.deleteTeam)
+router.get('/', controller.getUserTeams)
+router.get('/:teamId', controller.getTeamById)
+router.post('/', controller.createTeam)
+router.patch('/:teamId', controller.updateTeam)
+router.delete('/:teamId', controller.deleteTeam)
 
 // members
-router.get('/teams/:teamId/members', auth, controller.getMembers)
-router.post('/teams/:teamId/members', auth, controller.addMember)
-router.delete('/teams/:teamId/members/:userId', auth, controller.removeMember)
+router.get('/:teamId/members', controller.getMembers)
+router.post('/:teamId/members', controller.addMember)
+router.delete('/:teamId/members/:userId', controller.removeMember)
 
+router.get('/:tId/assign/:aId', requireAuth, assignController.getTeamAssignment);
+router.post('/:tId/assign', requireAuth, assignController.postAssignment);
+router.post('/:tId/assign/:aId/upload', requireAuth, fileUpload.array('files'), assignController.fileUpload);
 module.exports = router
