@@ -11,7 +11,5 @@ router.delete('/:tId', requireAuth, teamsControl.deleteTeamById);
 // Assignment routes
 router.get('/:tId/assign/:aId', requireAuth, teamsControl.getTeamAssignment);
 router.post('/:tId/assign/', requireAuth, teamsControl.postAssignment);
-router.post('/:tId/assign/:aId/', requireAuth, teamsControl.claimAssignment);
-router.delete('/:tId/assign/:aId', requireAuth, teamsControl.unclaimAssignment);
 
 module.exports = router;

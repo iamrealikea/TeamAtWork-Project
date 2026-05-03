@@ -35,19 +35,22 @@ const avatarFilter = (req, file, cb) => {
 const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, FILE_DIR);
+        
     },
     filename: (req, file, cb) => {
       const hash = hashUtil.hashFileName(file.originalname, req.params.aId);
       const ext = path.extname(file.originalname).toLowerCase();
+      const originalName = path.parse(file.originalname).name;
 
         // Attach to request for later use in controller
-        req.fileOriginal = file.originalname;
-        req.fileHash = hash;
-        req.fileExt = ext;
+        req.fileUpload = req.fileUpload
+          ? [...req.fileUpload, { hash, originalName, ext }]
+          : [{ hash, originalName, ext }];
 
         // File saved in hash+ext
         cb(null, `${hash}${ext}`);
     }
+    
 })
 
 const avatarUpload = multer({ storage: avatarStorage, fileFilter: avatarFilter, limits: { fileSize: 5 * 512 * 512 } })

@@ -56,3 +56,9 @@ exports.updateAvatar = async (req, res) => {
     res.status(500).json({ message: 'Server error' })
   }
 }  
+
+exports.getMyAssignments = async (req, res) => {
+  const userId = req.session.user.id
+  const assignments = await User.getMyAssignments(userId)
+  res.json(assignments)
+}

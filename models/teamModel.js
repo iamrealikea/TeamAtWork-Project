@@ -28,7 +28,7 @@ exports.getTeamMembers = async (teamId) => {
   return result.rows
 }
 
-// team by id (พร้อม check สิทธิ์)
+// team by id 
 exports.getTeamById = async (teamId, userId) => {
   const result = await db.query(`
     SELECT t.*, tm.role

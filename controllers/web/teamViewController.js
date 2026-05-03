@@ -75,21 +75,6 @@ exports.postAssignment = async (req, res) => {
     return res.json(result)
 }
 
-exports.claimAssignment = async (req, res) => {
-    const sessionUserId = req.session?.user?.id;
-    const teamId = req.params.tId;
-    const assignId = req.params.aId;
-    await Assignment.claimAssignment(assignId, sessionUserId);
-    return res.json({ message: 'Assignment claimed' });
-}
-
-exports.unclaimAssignment = async (req, res) => {
-    const sessionUserId = req.session?.user?.id;
-    const teamId = req.params.tId;
-    const assignId = req.params.aId;
-    await Assignment.unclaimAssignment(assignId, sessionUserId);
-}
-
 exports.uploadFile = async (req, res) => {
     const sessionUserId = req.session?.user?.id;
     const teamId = req.params.tId;

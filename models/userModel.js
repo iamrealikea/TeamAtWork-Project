@@ -84,3 +84,16 @@ exports.updateAvatar = async (id, hash, ext) => {
   );
   return result.rows[0];
 }
+
+exports.getMyAssignments = async (userId) => {
+  const result = await db.query(
+    `SELECT a.*, u.firstname AS creator_name
+    FROM assignments a
+    JOIN users u ON a.created_by = u.id
+    JOIN user_assignments ua ON a.id = ua.assignment_id
+    WHERE ua.user_id = $1
+    ORDER BY a.created_at DESC`,
+    [userId]
+  );
+  return result.rows;
+}

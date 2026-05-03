@@ -1,3 +1,5 @@
+const Team = require('../models/teamModel');
+
 const wantsJson = (req) => (
   req.originalUrl.startsWith('/api/') || req.xhr || req.get('accept')?.includes('application/json')
 );
@@ -52,9 +54,24 @@ const requireSessionOwner = (req, res, next) => {
   return next();
 };
 
+const requireManager = async (req, res, next) => {
+  const sessionUserId = Number(req.session?.user?.id);
+  const teamId = Number(req.params.tId);
+  const data = await Team.getTeamById(teamId, sessionUserId);
+  console.log('User role in team:', data);
+  if (data?.role !== 'Manager' || 'Owner') {
+    return res.status(403).json({ message: 'Manager privilege required' });
+  }
+  if (data?.teamId !== teamId) {
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+  return next();
+}
+
 module.exports = {
   requireAuth,
   requireGuest,
   requireAdmin,
   requireSessionOwner,
+  requireManager
 };

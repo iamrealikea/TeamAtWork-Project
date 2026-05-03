@@ -56,7 +56,7 @@ exports.getAssignmentById = async (assignId) => {
 exports.claimAssignment = async (assignId, userId) => {
     const result = await db.query(
         `INSERT INTO user_assignments (user_id, assignment_id)
-            VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+            VALUES ($1, $2)`,
         [userId, assignId]
     )
     return result.rowCount > 0;
