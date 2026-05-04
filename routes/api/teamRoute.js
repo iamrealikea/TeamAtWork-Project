@@ -11,8 +11,8 @@ router.use(requireAuth)
 router.get('/', requireAuth, controller.getUserTeams)
 router.get('/:teamId', requireAuth, controller.getTeamById)
 router.post('/', requireAuth, controller.createTeam)
-router.patch('/:teamId', requireAuth, controller.updateTeam)
-router.delete('/:teamId', requireAuth, controller.deleteTeam)
+router.patch('/:teamId', requireAuth, requireManager, controller.updateTeam)
+router.delete('/:teamId', requireAuth, requireManager, controller.deleteTeam)
 
 // members
 router.get('/:teamId/members', requireAuth, controller.getMembers)

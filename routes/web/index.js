@@ -5,5 +5,6 @@ const { requireAuth, requireGuest } = require('../../middleware/authMiddleware')
 
 router.get('/', requireAuth, dashboardControl.getDashboard);
 router.get('/dashboard', requireAuth, dashboardControl.getDashboard);
+router.get('/admin', requireAuth, dashboardControl.getAdminDashboard);
 
 module.exports = router;

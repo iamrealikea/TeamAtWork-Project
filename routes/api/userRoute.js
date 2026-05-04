@@ -6,7 +6,6 @@ const { requireAuth, requireAdmin, requireSessionOwner } = require('../../middle
 
 router.use(requireAuth)
 
-router.get('/all', requireAdmin, controller.getAllUsers)
 router.get('/myassign', requireAuth, controller.getMyAssignments)
 router.get('/:id', requireSessionOwner, controller.getMe)
 router.post('/:id', requireSessionOwner, controller.updateMe)

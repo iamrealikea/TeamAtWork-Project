@@ -6,6 +6,7 @@ const { requireAuth, requireGuest } = require('../../middleware/authMiddleware')
 // Team routes
 router.get('/', requireAuth, teamsControl.getAllTeams);
 router.get('/:tId', requireAuth, teamsControl.getTeamIdView);
+router.get('/:tId/edit', requireAuth, teamsControl.getTeamEditView);
 router.delete('/:tId', requireAuth, teamsControl.deleteTeamById);
 
 // Assignment routes
