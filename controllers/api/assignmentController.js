@@ -45,6 +45,7 @@ exports.fileUpload = async (req,res) => {
     const teamId = req.params.tId;
     const assignId = req.params.aId;
     const files = req.files;
+    console.log('Received files:', files);
     if(!files || files.length === 0) {
             return res.status(400).json({ error: 'No files uploaded' });
         }
@@ -74,7 +75,7 @@ exports.fileUpload = async (req,res) => {
             uploaded.push({ fileId, hash, ext, originalName });
         }
 
-        return res.json({ message: `${uploaded.length} file(s) uploaded successfully`, uploaded });
+        return res.status(201).json({ message: `${uploaded.length} file(s) uploaded successfully`, uploaded });
     } catch (error) {
         console.error('File upload error:', error);
         return res.status(500).json({ error: 'File upload failed' });
@@ -87,7 +88,7 @@ exports.getFileInUserAssignment = async (req, res) => {
     const teamId = req.params.tId;
     const assignId = req.params.aId;
     const files = await fileHandle.getFilesByAssignmentId(assignId, sessionUserId);
-    return res.json({ teamId, assignId, files })
+    return res.status(200).json({ teamId, assignId, files })
 }
 
 //Get all files submitted in assignment for admin view.
@@ -111,6 +112,7 @@ exports.deleteFileInUserAssignment = async (req, res) => {
     const assignId = req.params.aId;
     const fileId = req.params.file.split('.')[0];
     const fileExt = req.params.file.split('.')[1];
+    console.log(`Request to delete file: ${fileId}.${fileExt} in assignment ${assignId} by user ${sessionUserId}`);
     try {
         const filePath = path.join(FILE_DIR, `${fileId}.${fileExt}`);
         if (fs.existsSync(filePath)) {

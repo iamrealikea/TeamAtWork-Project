@@ -97,3 +97,11 @@ exports.getMyAssignments = async (userId) => {
   );
   return result.rows;
 }
+
+//Get active session
+exports.getActiveSession = async () => {
+  const result = await db.query(
+    `SELECT reltuples::bigint AS estimate FROM pg_class where relname = 'user_sessions';`,
+  );
+  return result.rows[0];
+}

@@ -65,7 +65,7 @@ const requireManager = async (req, res, next) => {
   if (data?.teamId !== teamId) {
     return res.status(500).json({ message: 'Internal server error' });
   }
-  return next();
+  return next( console.log('Manager access granted') );
 }
 
 module.exports = {

@@ -20,12 +20,12 @@ exports.getTeamById = async (req, res) => {
 
 // POST /teams
 exports.createTeam = async (req, res) => {
-  const { title } = req.body
+  const { name, description } = req.body
   const userId = req.session.user.id
 
-  if (!title) return res.status(400).json({ error: 'Title required' })
+  if (!name) return res.status(400).json({ error: 'Name required' })
 
-  const team = await Team.createTeam(title, userId)
+  const team = await Team.createTeam(name, userId, description)
   res.status(201).json(team)
 }
 
@@ -70,8 +70,15 @@ exports.addMember = async (req, res) => {
 
 // DELETE member
 exports.removeMember = async (req, res) => {
-  const { teamId, userId } = req.params
+  const { teamId } = req.params
+  const { userId } = req.body
 
   await Team.removeMember(teamId, userId)
   res.json({ message: 'Member removed' })
+}
+
+// Admin routes
+exports.getAllTeams = async (req, res) => {
+  const teams = await Team.getAllTeams()
+  res.json(teams)
 }

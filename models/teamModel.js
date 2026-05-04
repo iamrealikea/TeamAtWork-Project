@@ -40,17 +40,17 @@ exports.getTeamById = async (teamId, userId) => {
 }
 
 // create
-exports.createTeam = async (title, userId) => {
+exports.createTeam = async (name, userId, description) => {
   const team = await db.query(
-    `INSERT INTO teams (title, owner_id)
-     VALUES ($1, $2) RETURNING *`,
-    [title, userId]
+    `INSERT INTO teams (name, created_by, description)
+     VALUES ($1, $2, $3) RETURNING *`,
+    [name, userId, description]
   )
 
   // add owner เป็น member ด้วย
   await db.query(
-    `INSERT INTO team_members (user_id, team_id)
-     VALUES ($1, $2)`,
+    `INSERT INTO team_members (user_id, team_id, role)
+     VALUES ($1, $2, 'Manager')`,
     [userId, team.rows[0].id]
   )
 
@@ -58,13 +58,13 @@ exports.createTeam = async (title, userId) => {
 }
 
 // update
-exports.updateTeam = async (teamId, title, userId) => {
+exports.updateTeam = async (teamId, name, description, userId) => {
   const result = await db.query(`
     UPDATE teams
-    SET title = $1
-    WHERE id = $2 AND owner_id = $3
+    SET name = $1, description = $2
+    WHERE id = $3 AND created_by = $4
     RETURNING *
-  `, [title, teamId, userId])
+  `, [name, description, teamId, userId])
 
   return result.rows[0]
 }
@@ -72,7 +72,7 @@ exports.updateTeam = async (teamId, title, userId) => {
 // delete
 exports.deleteTeam = async (teamId, userId) => {
   await db.query(
-    `DELETE FROM teams WHERE id = $1 AND owner_id = $2`,
+    `DELETE FROM teams WHERE id = $1 AND created_by = $2`,
     [teamId, userId]
   )
 }
@@ -102,4 +102,14 @@ exports.removeMember = async (teamId, userId) => {
      WHERE team_id = $1 AND user_id = $2`,
     [teamId, userId]
   )
+}
+
+// Admin functions
+exports.getAllTeams = async () => {
+  const result = await db.query(`
+    SELECT t.*, u.firstname AS creator_name
+    FROM teams t
+    JOIN users u ON t.created_by = u.id
+  `)
+  return result.rows
 }

@@ -27,4 +27,9 @@ const getDashboard = async (req, res) => {
     });
 };
 
-module.exports = { getDashboard };
+const getAdminDashboard = async (req, res) => {
+    const sessionUserId = req.session?.user?.id;
+    res.render('dashboard/admin');
+}
+
+module.exports = { getDashboard, getAdminDashboard };

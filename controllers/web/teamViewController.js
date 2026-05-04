@@ -23,17 +23,30 @@ exports.getTeamIdView = async (req, res) => {
     const sessionUserId = req.session?.user?.id;
     const teamId = parsePositiveInt(req.params.tId);
     if (!teamId) {
-        return res.status(404).send('Team not found');
+        return res.status(404).render('dashboard/error', { message: 'Require team ID', statusCode: 404 });
     }
 
     const team = await Team.getTeamById(teamId, sessionUserId);
     if (!team) {
-        return res.status(404).send('Team not found');
+        return res.status(403).render('dashboard/error', { message: 'You are not a member of this team', statusCode: 403 });
     }
 
     const teamMember = await Team.getTeamMembers(teamId);
     const assignments = await Assignment.getTeamAssignment(teamId);
-    return res.render('dashboard/teamId', { team, teamMember, assignments });
+    return res.render('team/teamId', { team, teamMember, assignments });
+}
+
+exports.getTeamEditView = async (req, res) => {
+    const sessionUserId = req.session?.user?.id;
+    const teamId = parsePositiveInt(req.params.tId);
+    if (!teamId) {
+        return res.status(404).render('dashboard/error', { message: 'Team Id not found', statusCode: 404 });
+    }
+    const team = await Team.getTeamById(teamId, sessionUserId);
+    if (!team) {
+        return res.status(404).render('dashboard/error', { message: 'Team not found', statusCode: 404 });
+    } 
+    return res.render('team/teamEdit', { team });
 }
 
 // DELETE team by ID
@@ -55,10 +68,10 @@ exports.getTeamAssignment = async (req, res) => {
     if (!assignments) 
         return res.status(404).json({ error: 'Assignment not found' });
     if (action === 'view') {
-        return res.render('dashboard/assignmentId', { assignment: assignments, user:member });
+        return res.render('team/assignmentId', { assignment: assignments, user:member });
     }
     if (action === 'edit' && member.role === 'Manager') {
-        return res.render('dashboard/assignmentEditId', { assignment: assignments });
+        return res.render('team/assignmentEditId', { assignment: assignments });
     } else {
         return res.status(403).json({ error: 'Forbidden' });
     }

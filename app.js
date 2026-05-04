@@ -47,6 +47,7 @@ app.set("views", path.join(__dirname, "views"));
 
 const userApiRoutes = require('./routes/api/userRoute');
 const teamApiRoutes = require('./routes/api/teamRoute');
+const adminApiRoutes = require('./routes/api/adminRoute');
 const webRoutes = require('./routes/web/index');
 const authWebRoutes = require('./routes/web/authRoute');
 const teamWebRoutes = require('./routes/web/teamRoute');
@@ -55,6 +56,7 @@ app.use('/', webRoutes);
 app.use('/', authWebRoutes);
 app.use('/team', teamWebRoutes);
 
+app.use('/api/admin', adminApiRoutes);
 app.use('/api/user', userApiRoutes);
 app.use('/api/team', teamApiRoutes);
 
