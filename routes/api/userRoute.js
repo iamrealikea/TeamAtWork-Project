@@ -10,5 +10,6 @@ router.get('/myassign', requireAuth, controller.getMyAssignments)
 router.get('/:id', requireSessionOwner, controller.getMe)
 router.post('/:id', requireSessionOwner, controller.updateMe)
 router.post('/:id/avatar', requireSessionOwner, avatarUpload.single('avatar'), controller.updateAvatar)
+router.delete('/:id/avatar', requireSessionOwner, controller.deleteAvatar)
 
 module.exports = router

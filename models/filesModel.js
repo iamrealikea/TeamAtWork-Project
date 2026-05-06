@@ -39,7 +39,14 @@ exports.getFileByOriginalName = async (originalName, assignId, userId) => {
 //For admin to get all files in assignment
 exports.getAllFilesByAssignmentId = async (assignId) => {
     const result = await db.query(
-        `SELECT file_id, file_ext, file_original, user_id, created_at FROM assignment_files WHERE assignment_id = $1`,
+        `SELECT af.file_id, af.file_ext, af.file_original, af.user_id, af.created_at,
+            u.firstname, u.lastname, u.avatar_hash, u.avatar_ext,
+            ua.status, ua.submitted_at
+        FROM assignment_files af
+        JOIN users u ON af.user_id = u.id
+        LEFT JOIN user_assignments ua ON ua.user_id = af.user_id AND ua.assignment_id = af.assignment_id
+        WHERE af.assignment_id = $1
+        ORDER BY u.firstname ASC, u.lastname ASC, af.created_at DESC`,
         [assignId]
     );
     return result.rows;

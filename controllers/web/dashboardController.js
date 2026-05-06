@@ -29,7 +29,23 @@ const getDashboard = async (req, res) => {
 
 const getAdminDashboard = async (req, res) => {
     const sessionUserId = req.session?.user?.id;
-    res.render('dashboard/admin');
+    const sessions = await User.getActiveSession();
+    const teams = await Team.getAllTeams();
+    const users = await User.getAll();
+    const teamsWithMembers = await Promise.all(
+        teams.map(async (team) => ({
+            ...team,
+            members: await Team.getTeamMembers(team.id)
+        }))
+    );
+    res.render('dashboard/admin', {sessions, users, teams: teamsWithMembers});
 }
 
-module.exports = { getDashboard, getAdminDashboard };
+const getSetting = async (req, res) => {
+    const sessionUserId = req.session?.user?.id;
+    const user = await User.getById(sessionUserId);
+
+    res.render('account/setting', { user });
+};
+
+module.exports = { getDashboard, getAdminDashboard, getSetting };

@@ -29,10 +29,10 @@ const requireAdmin = (req, res, next) => {
   }
 
   if (wantsJson(req)) {
-    return res.status(403).json({ message: 'Admin privilege required' });
+    return res.render('dashboard/error', { message: 'Admin privilege required', statusCode: 401 });
   }
 
-  return res.status(403).send('Admin privilege required');
+  return res.render('dashboard/error', { message: 'Admin privilege required', statusCode: 401 });
 };
 
 const requireSessionOwner = (req, res, next) => {
@@ -59,11 +59,11 @@ const requireManager = async (req, res, next) => {
   const teamId = Number(req.params.tId);
   const data = await Team.getTeamById(teamId, sessionUserId);
   console.log('User role in team:', data);
-  if (data?.role !== 'Manager' || 'Owner') {
+  if (data.role !== 'Manager') {
     return res.status(403).json({ message: 'Manager privilege required' });
   }
-  if (data?.teamId !== teamId) {
-    return res.status(500).json({ message: 'Internal server error' });
+  if (data?.id !== teamId) {
+    return res.status(500).json({ message: 'Internal server error. Team ID mismatch' });
   }
   return next( console.log('Manager access granted') );
 }

@@ -1,0 +1,124 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+<link rel="stylesheet" href="/css/assignment.css">
+<% // Calculate time remaining for the assignment
+    const dueDate = new Date(assignment.due_date);
+    const diffMs = dueDate - new Date();
+        let timeRemainingText = '';
+        if (diffMs <= 0) {
+            timeRemainingText = 'Over due';
+        } else {
+            const totalMinutes = Math.floor(diffMs / (1000 * 60));
+            const days = Math.floor(totalMinutes / (60 * 24));
+            const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+            const minutes = totalMinutes % 60;
+            const parts = [];
+            if (days > 0) parts.push(`${days}d`);
+            if (hours > 0 || days > 0) parts.push(`${hours}h`);
+            parts.push(`${minutes}m`);
+            timeRemainingText = parts.join(' ');
+        }
+
+        const dueDateParts = new Intl.DateTimeFormat('en-TH', {
+            weekday: 'long',
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        }).formatToParts(dueDate).reduce((acc, part) => {
+            if (part.type !== 'literal') acc[part.type] = part.value;
+            return acc;
+        }, {});
+
+        const dueTimeText = new Intl.DateTimeFormat('en-TH', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }).format(dueDate);
+
+        const dueDateText = `${dueDateParts.weekday}, ${dueDateParts.day} ${dueDateParts.month} ${dueDateParts.year} at ${dueTimeText}`;
+    %>
+<div class="header-with-icon">
+    <div id="header-info">
+        <img src="/icon/assignment.svg" alt="Assignment Icon" class="header-icon">
+        <h1><%= assignment.title %></h1>
+    </div>
+    <div id="header-btn">
+    <% if (!status?.status || status.status === 'Unclaimed') { %>
+        <button class="btn" id="claim-assign">Claim Assignment</button>
+    <% } else if (user.role === 'Manager') { %>
+        <button class="btn" id="edit-assign">Edit Assignment</button>
+    <% } else { %>
+        
+            <button class="btn" id="abandon-assign">Abandon Assignment</button>
+            <button class="btn" id="mark-assign">Mark As Finish</button>
+        
+    <% } %>
+    </div>
+</div>
+<div class="assignment-layout">
+    <div class="assignment-left">
+        <div id="detail-container">
+            <section>
+                <div class="cardbox" id="assign-box">
+                    <p><b>Created by:</b> <%= assignment.creator_name %></p>
+                    <p><b>Due Date:</b> <%= dueDateText %></p>
+                    <% if (assignment.status !== 'Submitted') { %>
+                        <p><b>Time remaining:</b> <%= timeRemainingText %></p>
+                    <% } %>
+                    <p><b>Status:</b>
+                        <% if (status?.status) { %>
+                            <%= status.status %>
+                        <% } else if (user.role === 'Manager') { %>
+                            <%= assignment.status %>
+                        <% } else { %>
+                            Unclaimed
+                        <% } %>
+                    </p>
+                </div>
+                <div class="cardbox" id="assign-box">
+                    <h3>Description</h3>
+                    <p><%= assignment.description %></p>
+                </div>
+            </section>
+        </div>
+    </div>
+    <div class="assignment-right">
+        <section class="cardbox submission-card" id="assign-box">
+            <h2>Submission</h2>
+            <% if (user.role === 'Manager') { %>
+                <p>For manager, Upload files will be visible to all team members.</p>
+            <% } %>
+                <form id="submission-form" action="/api/team/<%= assignment.team_id %>/assign/<%= assignment.id %>/upload" method="post" enctype="multipart/form-data">
+                    <div class="file-picker">
+                        <input type="file" name="files" id="submissionFileInput" class="file-input-hidden" multiple required />
+                        <label for="submissionFileInput" class="file-dropzone" id="submissionDropzone">
+                            <div class="file-dropzone-title">Drag and drop files here</div>
+                            <div class="file-dropzone-subtitle">or click to choose files</div>
+                        </label>
+                        <div class="file-actions">
+                            <button type="button" class="btn file-clear-btn" id="submissionClearBtn">Clear</button>
+                        </div>
+                        <div class="file-preview" id="submissionFilePreview">
+                            <span class="file-preview-empty">No files chosen.</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" id="upload-btn">Upload Files</button>
+                </form>
+            <div id="submission-files" data-team-id="<%= assignment.team_id %>" data-assign-id="<%= assignment.id %>">
+                <label>Uploaded Files:</label>
+                <div class="flexlist"></div>
+                <p id="submission-empty">No files uploaded yet.</p>
+            </div>
+        </section>
+    </div>
+</div>
+<% if (user.role === 'Manager') { %>
+        <section class="cardbox submission-card" id="submission-all" data-team-id="<%= assignment.team_id %>" data-assign-id="<%= assignment.id %>">
+            <h2>All Submissions</h2>
+            <div class="flexlist"></div>
+            <p id="submission-all-empty">No submissions yet.</p>
+        </section>
+        <% } %>
+<script src="/js/assignment-files.js"></script>
+<%- include("../partials/footer") %>

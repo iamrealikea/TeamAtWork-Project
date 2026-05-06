@@ -12,6 +12,66 @@ exports.getTeamAssignment = async (req, res) => {
     return res.json ({ teamId, assignId})
 }
 
+exports.getClaimedMembers = async (req, res) => {
+    const assignId = req.params.aId;
+    const members = await Assignment.getClaimedMembers(assignId);
+    return res.status(200).json({ assignId, members });
+}
+
+exports.getUnclaimedMembers = async (req, res) => {
+    const teamId = req.params.tId;
+    const assignId = req.params.aId;
+    try {
+        const members = await Assignment.getUnclaimedMembers(teamId, assignId);
+        return res.status(200).json({ assignId, members });
+    } catch (error) {
+        console.error('Error loading unclaimed members:', error);
+        return res.status(500).json({ error: 'Unable to load members' });
+    }
+}
+
+exports.addMemberToAssignment = async (req, res) => {
+    const teamId = req.params.tId;
+    const assignId = req.params.aId;
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'User id required' });
+    }
+
+    try {
+        const added = await Assignment.claimAssignment(assignId, userId);
+        if (!added) {
+            return res.status(409).json({ error: 'Member already assigned or not in team' });
+        }
+        return res.status(201).json({ message: 'Member added' });
+    } catch (error) {
+        console.error('Error adding member:', error);
+        return res.status(500).json({ error: 'Unable to add member' });
+    }
+}
+
+exports.removeMemberFromAssignment = async (req, res) => {
+    const assignId = req.params.aId;
+    const { userId } = req.params;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'User id required' });
+    }
+
+    try {
+        const removed = await Assignment.unclaimAssignment(assignId, userId);
+        if (!removed) {
+            return res.status(404).json({ error: 'Member not assigned' });
+        }
+        return res.status(200).json({ message: 'Member unassigned' });
+    } catch (error) {
+        console.error('Error removing member:', error);
+        return res.status(500).json({ error: 'Unable to unassign member' });
+    }
+}
+
+//Manager can edit assignment details.
 exports.postAssignment = async (req, res) => {
     const sessionUserId = req.session?.user?.id;
     const teamId = req.params.tId;
@@ -22,6 +82,35 @@ exports.postAssignment = async (req, res) => {
     return res.json(result)
 }
 
+exports.patchAssignment = async (req, res) => {
+    const sessionUserId = req.session?.user?.id;
+    const teamId = req.params.tId;
+    const assignId = req.params.aId;
+    const { title, description, due_date } = req.body;
+    try {
+        const result = await Assignment.updateAssignment(
+        assignId, title, description, due_date)
+        if (!result){
+            return res.status(404).json({ error: 'Assignment not found' });
+        }
+    } catch (error) {
+        console.error('Error updating assignment:', error);
+        return res.status(500).json({ error: 'Failed to update assignment' });
+    }
+    return res.json({ message: 'Assignment updated successfully' });
+}
+
+exports.deleteAssignment = async (req, res) => {
+    const teamId = req.params.tId;
+    const assignId = req.params.aId;
+    const deleted = await Assignment.deleteAssignment(assignId, teamId);
+    if (!deleted) {
+        return res.status(404).json({ error: 'Assignment not found' });
+    }
+    return res.json({ message: 'Assignment deleted successfully' });
+}
+
+//For users to view and manage their files in assignment.
 exports.claimAssignment = async (req, res) => {
     const sessionUserId = req.session?.user?.id;
     const teamId = req.params.tId;
@@ -98,9 +187,20 @@ exports.getAllFilesInAssignment = async (req, res) => {
     const userFileMap = {};
     files.forEach(file => {
         if (!userFileMap[file.user_id]) {
-            userFileMap[file.user_id] = [];
+            userFileMap[file.user_id] = {
+                user: {
+                    id: file.user_id,
+                    firstname: file.firstname,
+                    lastname: file.lastname,
+                    avatar_hash: file.avatar_hash,
+                    avatar_ext: file.avatar_ext,
+                    status: file.status,
+                    submitted_at: file.submitted_at
+                },
+                files: []
+            };
         }
-        userFileMap[file.user_id].push(file);   
+        userFileMap[file.user_id].files.push(file);   
     });
     return res.json({ assignId, files: userFileMap });
 }

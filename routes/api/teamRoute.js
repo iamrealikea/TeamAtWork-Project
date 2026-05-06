@@ -20,7 +20,13 @@ router.post('/:teamId/members', requireAuth, requireManager,  controller.addMemb
 router.delete('/:teamId/members/:userId', requireAuth, requireManager, controller.removeMember)
 
 router.get('/:tId/assign/:aId', requireAuth, assignController.getTeamAssignment);
+router.get('/:tId/assign/:aId/claimed', requireAuth, requireManager, assignController.getClaimedMembers);
+router.get('/:tId/assign/:aId/unclaimed', requireAuth, requireManager, assignController.getUnclaimedMembers);
+router.post('/:tId/assign/:aId/members', requireAuth, requireManager, assignController.addMemberToAssignment);
+router.delete('/:tId/assign/:aId/members/:userId', requireAuth, requireManager, assignController.removeMemberFromAssignment);
 router.post('/:tId/assign', requireAuth, requireManager,  assignController.postAssignment);
+router.post('/:tId/assign/:aId/edit', requireAuth, requireManager, assignController.patchAssignment);
+router.delete('/:tId/assign/:aId', requireAuth, requireManager, assignController.deleteAssignment);
 
 // assignment claim/unclaim with query param ?action=claim or ?action=unclaim
 router.patch('/:tId/assign/:aId', requireAuth, assignController.claimAssignment);

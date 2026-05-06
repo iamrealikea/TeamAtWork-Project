@@ -1,0 +1,24 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+	<h1>Create Assignment</h1>
+	<form action="/team/<%= team.id %>/assign" method="post" class="assignment-form">
+		<div class="form-group">
+			<label for="title">Title</label>
+			<input type="text" id="title" name="title" required />
+		</div>
+
+		<div class="form-group">
+			<label for="description">Description</label>
+			<textarea id="description" name="description" rows="5" required></textarea>
+		</div>
+
+		<div class="form-group">
+			<label for="due_date">Due date</label>
+			<input type="datetime-local" id="due_date" name="due_date" required />
+		</div>
+
+		<div class="form-actions">
+			<button type="submit" class="btn">Create</button>
+			<a href="/team/<%= team.id %>" class="btn">Cancel</a>
+		</div>
+	</form>

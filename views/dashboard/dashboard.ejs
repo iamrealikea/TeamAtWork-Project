@@ -1,6 +1,6 @@
 <%- include("../partials/header") %>
 <%- include("../partials/navigation") %>
-
+<link rel="stylesheet" href="/css/dashboard.css">
 <section>
     <h1>Dashboard</h1>
     <p>Welcome to your dashboard! Here you can manage your projects.</p>
@@ -14,19 +14,25 @@
         <h2>Hello, <%= data.user.firstname %> <%= data.user.lastname %></h2>
     </div>
     <div>
-        <form action="/logout" method="POST" style="display: inline;">
+        <form action="/logout" method="POST">
             <button type="submit" class="btn">Log Out</button>
         </form>
-        <button class="btn">Profile Settings</button>
+        <form action="/account" method="GET">
+            <button type="submit" class="btn">Profile Settings</button>
+        </form>
     </div>
 </section>
 <section class="cardbox" id="recent-teams">
-    <h2>Recent Team</h2>
+    <div id="heading-with-btn">
+        <h2>Recent Team</h2>
+        <h3><a href="/team/">All Team ></a></h3>
+    </div>
+    
     <% if (!data.teams || data.teams.length === 0) { %>
         <p>No teams yet.</p>
     <% } %>
     <% (data.teams).forEach(team => { %>
-            <a href="/teams/<%= team.id %>">
+            <a href="/team/<%= team.id %>">
       <div id="team-card">
         <h3><%= team.name %></h3>
         <p>Members </p>

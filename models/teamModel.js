@@ -69,12 +69,43 @@ exports.updateTeam = async (teamId, name, description, userId) => {
   return result.rows[0]
 }
 
+exports.updateTeamAdmin = async (teamId, updates) => {
+  const entries = Object.entries(updates || {}).filter(([key, value]) => (
+    ['name', 'description'].includes(key) && value !== undefined
+  ))
+
+  if (entries.length === 0) {
+    return null
+  }
+
+  const setClause = entries
+    .map(([key], index) => `${key} = $${index + 1}`)
+    .join(', ')
+  const values = entries.map(([, value]) => value)
+  values.push(teamId)
+
+  const result = await db.query(
+    `UPDATE teams SET ${setClause} WHERE id = $${entries.length + 1} RETURNING *`,
+    values
+  )
+
+  return result.rows[0]
+}
+
 // delete
 exports.deleteTeam = async (teamId, userId) => {
   await db.query(
     `DELETE FROM teams WHERE id = $1 AND created_by = $2`,
     [teamId, userId]
   )
+}
+
+exports.deleteTeamAdmin = async (teamId) => {
+  const result = await db.query(
+    `DELETE FROM teams WHERE id = $1 RETURNING id`,
+    [teamId]
+  )
+  return result.rows[0]
 }
 
 // members

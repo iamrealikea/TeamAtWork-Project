@@ -10,6 +10,7 @@ router.get('/:tId/edit', requireAuth, teamsControl.getTeamEditView);
 router.delete('/:tId', requireAuth, teamsControl.deleteTeamById);
 
 // Assignment routes
+router.get('/:tId/assign/new', requireAuth, teamsControl.getNewAssignmentView);
 router.get('/:tId/assign/:aId', requireAuth, teamsControl.getTeamAssignment);
 router.post('/:tId/assign/', requireAuth, teamsControl.postAssignment);
 

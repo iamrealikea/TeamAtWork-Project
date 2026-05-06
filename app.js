@@ -60,6 +60,18 @@ app.use('/api/admin', adminApiRoutes);
 app.use('/api/user', userApiRoutes);
 app.use('/api/team', teamApiRoutes);
 
+app.use((req, res) => {
+	const wantsJson = req.path.startsWith('/api') || req.accepts(['json', 'html']) === 'json';
+	if (wantsJson) {
+		return res.status(404).json({ message: 'Error 404 Page not found' });
+	}
+
+	return res.status(404).render('dashboard/error', {
+		message: 'Page not found',
+		statusCode: 404,
+	});
+});
+
 app.listen(port, () => {
 console.log(`Server running at http://localhost:${port}`);
 });

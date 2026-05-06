@@ -1,0 +1,7 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+<section>
+    <h1>Error <%= statusCode %></h1>
+    <p><%= message %></p>
+    <button class="btn" onclick="window.location.href='/dashboard'">Return to Dashboard</button>
+</section>

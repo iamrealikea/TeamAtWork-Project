@@ -15,7 +15,7 @@ exports.getAllTeams = async (req, res) => {
     for (const team of teams) {
         teamMemberMap[team.id] = await Team.getTeamMembers(team.id);
     }
-    return res.json({ teams, teamMemberMap })
+    return res.render('team/allTeam', { teams, teamMemberMap })
 }
 
 // GET team by ID with members and assignments
@@ -33,7 +33,17 @@ exports.getTeamIdView = async (req, res) => {
 
     const teamMember = await Team.getTeamMembers(teamId);
     const assignments = await Assignment.getTeamAssignment(teamId);
-    return res.render('team/teamId', { team, teamMember, assignments });
+    const assignmentsWithStatus = await Promise.all(
+        assignments.map(async (assignment) => {
+            const status = await Assignment.checkStatus(assignment.id, sessionUserId);
+            return {
+                ...assignment,
+                myStatus: status?.status || null,
+                isMine: Boolean(status)
+            };
+        })
+    );
+    return res.render('team/teamId', { team, members: teamMember, assignments: assignmentsWithStatus });
 }
 
 exports.getTeamEditView = async (req, res) => {
@@ -47,6 +57,22 @@ exports.getTeamEditView = async (req, res) => {
         return res.status(404).render('dashboard/error', { message: 'Team not found', statusCode: 404 });
     } 
     return res.render('team/teamEdit', { team });
+}
+
+// GET new assignment form
+exports.getNewAssignmentView = async (req, res) => {
+    const sessionUserId = req.session?.user?.id;
+    const teamId = parsePositiveInt(req.params.tId);
+    if (!teamId) {
+        return res.status(404).render('dashboard/error', { message: 'Require team ID', statusCode: 404 });
+    }
+
+    const team = await Team.getTeamById(teamId, sessionUserId);
+    if (!team) {
+        return res.status(403).render('dashboard/error', { message: 'You are not a member of this team', statusCode: 403 });
+    }
+
+    return res.render('team/newAssignment', { team });
 }
 
 // DELETE team by ID
@@ -65,10 +91,15 @@ exports.getTeamAssignment = async (req, res) => {
     const member = await Team.getTeamById(teamId, sessionUserId);
     const assignId = req.params.aId;
     const assignments = await Assignment.getAssignmentById(assignId)
+    let status = await Assignment.checkStatus(assignId, sessionUserId);
+    if (!status){
+        status = { status: 'Unclaimed' }
+    }
+    console.log(status)
     if (!assignments) 
         return res.status(404).json({ error: 'Assignment not found' });
     if (action === 'view') {
-        return res.render('team/assignmentId', { assignment: assignments, user:member });
+        return res.render('team/assignmentId', { assignment: assignments, user:member, status });
     }
     if (action === 'edit' && member.role === 'Manager') {
         return res.render('team/assignmentEditId', { assignment: assignments });
@@ -85,7 +116,11 @@ exports.postAssignment = async (req, res) => {
     const result = await Assignment.postAssignment(
         title, description, teamId, sessionUserId, due_date
     )
-    return res.json(result)
+    const createdId = Array.isArray(result) ? result[0]?.id : result?.id;
+    if (createdId) {
+        return res.redirect(`/team/${teamId}/assign/${createdId}?action=view`);
+    }
+    return res.redirect(`/team/${teamId}`);
 }
 
 exports.uploadFile = async (req, res) => {
