@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="/css/navigation.css">
+<nav class="navigation">
+    <a class="nav-logo" href="/"><img src="/logo.png" alt="Logo"></a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+    </button>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/team">Team</a>
+        <a href="/account">Account</a>
+    </div>
+</nav>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const nav = document.querySelector("nav.navigation");
+        if (!nav) return;
+        const toggle = nav.querySelector(".nav-toggle");
+        if (!toggle) return;
+
+        toggle.addEventListener("click", () => {
+            const isOpen = nav.classList.toggle("is-open");
+            toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+    });
+</script>

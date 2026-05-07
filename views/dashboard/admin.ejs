@@ -1,0 +1,135 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+<section>
+    <h1>Admin Dashboard</h1>
+</section>
+<section class="cardbox" id="admin-overview" >
+    <h2>Overview</h2>
+    <div>
+        <h2>Active Users</h2>
+        <h2><%= sessions.estimate %></h2>
+    </div>
+    <div>
+        <h2>Total Users</h2>
+        <h2><%= users.length %></h2>
+    </div>
+    <div>
+        <h2>Total Teams</h2>
+        <h2><%= teams.length %></h2>
+    </div>
+</section>
+<section class="cardbox" id="recent-teams">
+    <h2>All Team</h2>
+    <% if (!teams || teams.length === 0) { %>
+        <p>No teams yet.</p>
+    <% } %>
+        <% (teams).forEach(team => { %>
+                        <a href="/team/<%= team.id %>">
+            <div id="team-card">
+        <h3><%= team.name %></h3>
+        <p>Members </p>
+      <div id="team-members">
+            <% 
+                const members = team.members || [];
+                const maxVisibleMembers = 3;
+                const visibleMembers = members.slice(0, maxVisibleMembers);
+                const overflowMembers = members.length - visibleMembers.length;
+                %>
+            <% visibleMembers.forEach(member => { 
+             const avatarSrc = (member.avatar_hash && member.avatar_ext)
+                ? `/uploads/profiles/${member.avatar_hash}${member.avatar_ext}`
+                : '/default-avatar.png';
+            %>
+          <img src="<%= avatarSrc %>" id="mini-avatar">
+        <% }) %>
+        <% if (overflowMembers > 0) { %>
+            <span class="member-overflow">+<%= overflowMembers %></span>
+        <% } %>
+      </div>
+      </a>
+        <button
+            class="btn admin-edit-team"
+            type="button"
+            data-team-id="<%= team.id %>"
+            data-team-name="<%= team.name %>"
+            data-team-description="<%= team.description || '' %>"
+        >
+            Edit Team
+        </button>
+      </div>
+            </a>
+    <% }) %>
+</section>
+<section class="cardbox">
+    <h2>All Users</h2>
+    <% if (!users || users.length === 0) { %>
+        <p>No users yet.</p>
+    <% } %>
+    <% (users).forEach(user => { %>
+      <div id="user-card">
+        <h3><%= user.firstname %> <%= user.lastname %></h3>
+        <p>Email: <%= user.email %></p>
+        <button
+            class="btn admin-edit-user"
+            type="button"
+            data-user-id="<%= user.id %>"
+            data-user-firstname="<%= user.firstname %>"
+            data-user-lastname="<%= user.lastname %>"
+            data-user-email="<%= user.email %>"
+            data-user-username="<%= user.username %>"
+        >
+            Edit User
+        </button>
+      </div>
+    <% }) %>
+</section>
+
+<div class="modal-overlay" id="admin-team-modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="admin-team-title">
+        <div class="modal-header">
+            <h2 id="admin-team-title">Edit Team</h2>
+            <button class="modal-close" type="button" aria-label="Close">
+                &times;
+            </button>
+        </div>
+        <form id="admin-team-form">
+            <input type="hidden" name="teamId" id="admin-team-id" />
+            <label for="admin-team-name">Team Name</label>
+            <input type="text" id="admin-team-name" name="name" />
+            <label for="admin-team-description">Description</label>
+            <textarea id="admin-team-description" name="description" rows="3"></textarea>
+            <div class="modal-actions">
+                <button class="btn" type="submit">Save Team</button>
+                <button class="btn" id="admin-delete-team" type="button">Delete Team</button>
+            </div>
+        </form>
+        
+    </div>
+</div>
+
+<div class="modal-overlay" id="admin-user-modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="admin-user-title">
+        <div class="modal-header">
+            <h2 id="admin-user-title">Edit User</h2>
+            <button class="modal-close" type="button" aria-label="Close">
+                &times;
+            </button>
+        </div>
+        <form id="admin-user-form">
+            <input type="hidden" name="userId" id="admin-user-id" />
+            <label for="admin-user-firstname">First Name</label>
+            <input type="text" id="admin-user-firstname" name="firstname" />
+            <label for="admin-user-lastname">Last Name</label>
+            <input type="text" id="admin-user-lastname" name="lastname" />
+            <label for="admin-user-email">Email</label>
+            <input type="email" id="admin-user-email" name="email" />
+            <label for="admin-user-username">Username</label>
+            <input type="text" id="admin-user-username" name="username" />
+            <div class="modal-actions">
+                <button class="btn" type="submit">Save User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/js/admin-edit.js"></script>
