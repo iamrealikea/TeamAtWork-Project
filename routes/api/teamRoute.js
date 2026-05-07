@@ -17,7 +17,9 @@ router.delete('/:teamId', requireAuth, requireManager, controller.deleteTeam)
 // members
 router.get('/:teamId/members', requireAuth, controller.getMembers)
 router.post('/:teamId/members', requireAuth, requireManager,  controller.addMember)
-router.delete('/:teamId/members/:userId', requireAuth, requireManager, controller.removeMember)
+router.patch('/:teamId/members/:userId', requireAuth, requireManager, controller.updateMemberRole)
+router.delete('/:teamId/members/self', requireAuth, controller.leaveTeam)
+router.delete('/:teamId/members/:userId', requireAuth, requireManager, controller.kickMember)
 
 //Assignments
 router.get('/:tId/assign/:aId', requireAuth, assignController.getTeamAssignment);

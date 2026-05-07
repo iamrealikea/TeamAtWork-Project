@@ -258,6 +258,16 @@
     display: block;
 }
 
+.member-columns {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.member-columns > section {
+    flex: 1;
+}
+
 #assignment-edit-form input[type="datetime-local"] {
     width: 260px;
     margin-right: 0;
@@ -271,6 +281,10 @@
 
 @media (max-width: 768px) {
     .assignment-layout {
+        flex-direction: column;
+    }
+
+    .member-columns {
         flex-direction: column;
     }
 

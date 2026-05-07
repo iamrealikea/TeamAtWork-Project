@@ -56,10 +56,16 @@ const requireSessionOwner = (req, res, next) => {
 
 const requireManager = async (req, res, next) => {
   const sessionUserId = Number(req.session?.user?.id);
-  const teamId = Number(req.params.tId);
+  const teamIdParam = req.params.tId ?? req.params.teamId;
+  const teamId = Number(teamIdParam);
+
+  if (Number.isNaN(teamId)) {
+    return res.status(400).json({ message: 'Invalid team id' });
+  }
+
   const data = await Team.getTeamById(teamId, sessionUserId);
   console.log('User role in team:', data);
-  if (data.role !== 'Manager') {
+  if (!data || data.role !== 'Manager') {
     return res.status(403).json({ message: 'Manager privilege required' });
   }
   if (data?.id !== teamId) {

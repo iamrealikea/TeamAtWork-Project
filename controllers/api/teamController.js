@@ -68,13 +68,76 @@ exports.addMember = async (req, res) => {
   res.status(201).json({ message: 'Member added' })
 }
 
-// DELETE member
-exports.removeMember = async (req, res) => {
+// DELETE self from team
+exports.leaveTeam = async (req, res) => {
   const { teamId } = req.params
-  const { userId } = req.body
+  const userId = req.session.user.id
+
+  const team = await Team.getTeamById(teamId, userId)
+  if (!team) {
+    return res.status(403).json({ error: 'You are not a member of this team' })
+  }
 
   await Team.removeMember(teamId, userId)
-  res.json({ message: 'Member removed' })
+  res.json({ message: 'Left team successfully' })
+}
+
+exports.updateMemberRole = async (req, res) => {
+  const { teamId, userId } = req.params
+  const { role } = req.body
+
+  if (!['Member', 'Manager'].includes(role)) {
+    return res.status(400).json({ error: 'Invalid role' })
+  }
+
+  await Team.updateMemberRole(teamId, userId, role)
+  res.json({ message: 'Role updated' })
+}
+
+// DELETE member (kick)
+exports.kickMember = async (req, res) => {
+  const { teamId, userId } = req.params
+  const userIdFromToken = req.session.user.id
+
+  try {
+    // Get team members to check roles
+    const members = await Team.getTeamMembers(teamId)
+    const requester = members.find(m => m.id === userIdFromToken)
+    const memberToKick = members.find(m => m.id === parseInt(userId))
+
+    if (!requester) {
+        if (!req.session.user.isAdmin) {
+            return res.status(403).json({ message: 'You are not a member of this team' })
+        }
+        // Admin global can kick without being a member
+    }
+
+    if (!memberToKick) {
+        return res.status(404).json({ message: 'Member not found in team' })
+    }
+
+    // Cannot kick yourself
+    if (userIdFromToken === parseInt(userId)) {
+        return res.status(400).json({ message: 'Cannot kick yourself' })
+    }
+
+    // Cannot kick admin (but no admin role in teams)
+    // If requester is manager, cannot kick other managers
+    if (requester && requester.role === 'Manager' && memberToKick.role === 'Manager') {
+        return res.status(403).json({ message: 'Managers cannot kick other managers' })
+    }
+
+    // Only admin global or team managers can kick
+    if (!req.session.user.isAdmin && (!requester || requester.role !== 'Manager')) {
+        return res.status(403).json({ message: 'Only admins and managers can kick members' })
+    }
+
+    await Team.removeMember(teamId, userId)
+    res.json({ message: 'Member kicked successfully' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
+  }
 }
 
 // Admin routes

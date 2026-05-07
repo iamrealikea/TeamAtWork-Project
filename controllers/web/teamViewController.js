@@ -1,5 +1,6 @@
 const Team = require('../../models/teamModel')
 const Assignment = require('../../models/assignmentModel')
+const User = require('../../models/userModel')
 const { nanoid } = require('nanoid');
 
 
@@ -22,12 +23,15 @@ exports.getAllTeams = async (req, res) => {
 // GET team by ID with members and assignments
 exports.getTeamIdView = async (req, res) => {
     const sessionUserId = req.session?.user?.id;
+    const sessionUser = req.session?.user;
     const teamId = parsePositiveInt(req.params.tId);
     if (!teamId) {
         return res.status(404).render('dashboard/error', { message: 'Require team ID', statusCode: 404 });
     }
 
-    const team = await Team.getTeamById(teamId, sessionUserId);
+    const team = sessionUser?.isAdmin
+        ? await Team.getTeamByIdAdmin(teamId)
+        : await Team.getTeamById(teamId, sessionUserId);
     if (!team) {
         return res.status(403).render('dashboard/error', { message: 'You are not a member of this team', statusCode: 403 });
     }
@@ -45,20 +49,53 @@ exports.getTeamIdView = async (req, res) => {
         })
     );
     console.log(team, teamMember, assignmentsWithStatus)
-    return res.render('team/teamId', { team, members: teamMember, assignments: assignmentsWithStatus });
+    return res.render('team/teamId', { team, members: teamMember, assignments: assignmentsWithStatus, isAdmin: sessionUser?.isAdmin === true });
 }
 
 exports.getTeamEditView = async (req, res) => {
-    const sessionUserId = req.session?.user?.id;
+    const sessionUser = req.session?.user;
+    const sessionUserId = sessionUser?.id;
     const teamId = parsePositiveInt(req.params.tId);
     if (!teamId) {
         return res.status(404).render('dashboard/error', { message: 'Team Id not found', statusCode: 404 });
     }
-    const team = await Team.getTeamById(teamId, sessionUserId);
+
+    const team = sessionUser?.isAdmin
+        ? await Team.getTeamByIdAdmin(teamId)
+        : await Team.getTeamById(teamId, sessionUserId);
     if (!team) {
         return res.status(404).render('dashboard/error', { message: 'Team not found', statusCode: 404 });
-    } 
-    return res.render('team/teamEdit', { team });
+    }
+
+    const members = await Team.getTeamMembers(teamId);
+    members.sort((a, b) => {
+        if (a.role === 'Manager' && b.role !== 'Manager') return -1;
+        if (a.role !== 'Manager' && b.role === 'Manager') return 1;
+        return 0;
+    });
+    const memberIds = members.map((member) => member.id);
+    const users = await User.getAll();
+    const isManager = team.role === 'Manager';
+
+    if (!sessionUser?.isAdmin && !isManager) {
+        return res.status(403).render('dashboard/error', { message: 'Manager privilege required', statusCode: 403 });
+    }
+
+    return res.render('team/teamEdit', { team, members, users, memberIds, isAdmin: sessionUser?.isAdmin === true, currentUserId: sessionUserId });
+}
+
+// GET create team form
+exports.getCreateTeamView = async (req, res) => {
+    console.log('getCreateTeamView called');
+    try {
+        const users = await User.getAll();
+        const currentUserId = req.session.user.id;
+        console.log('Rendering createTeam with', users.length, 'users');
+        res.render('team/createTeam', { users, currentUserId });
+    } catch (error) {
+        console.error('Error in getCreateTeamView:', error);
+        res.status(500).render('dashboard/error', { message: 'Internal server error', statusCode: 500 });
+    }
 }
 
 // GET new assignment form

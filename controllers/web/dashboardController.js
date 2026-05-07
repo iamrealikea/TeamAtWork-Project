@@ -1,10 +1,12 @@
 const User = require('../../models/userModel');
 const Team = require('../../models/teamModel');
+const Assignment = require('../../models/assignmentModel');
 
 const getDashboard = async (req, res) => {
     const sessionUserId = req.session?.user?.id;
     const user = await User.getById(sessionUserId);
     const teams = await Team.getUserTeams(sessionUserId);
+    const assignment = await Assignment.getUserAssignment(sessionUserId);
     const teamMembersMap = {};
 
     // Fetch members for each team
@@ -17,12 +19,13 @@ const getDashboard = async (req, res) => {
         });
         return;
     }
-
     res.render('dashboard/dashboard', {
         data: {
             user,
             teams: teams,
-            teamMembers: teamMembersMap
+            teamMembers: teamMembersMap,
+            assignment: assignment,
+            session: req.session.user
         }
     });
 };

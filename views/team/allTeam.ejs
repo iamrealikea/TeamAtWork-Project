@@ -1,12 +1,17 @@
 <%- include("../partials/header") %>
   <%- include("../partials/navigation") %>
 
-    <link rel="stylesheet" href="/css/team.css">
-    <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/team.css">
 
-    <section class="page">
-      <h1 class="page-title">Your Team</h1>
-
+    <div class="header-with-icon">
+      <div id="header-info">
+        <img src="/icon/team.svg" alt="Team Icon" class="header-icon">
+        <h1>Your Team</h1>
+      </div>
+      <div id="header-btn">
+        <button class="btn" id="create-team-btn"><a href="/team/create">Create Team</a></button>
+      </div>
+    </div>
       <div class="toolbar">
 
         <input type="text" id="searchInput" placeholder="Search team..." />

@@ -39,6 +39,21 @@ exports.getTeamById = async (teamId, userId) => {
   return result.rows[0]
 }
 
+exports.getTeamByIdAdmin = async (teamId) => {
+  const result = await db.query(`
+    SELECT t.*, u.firstname AS creator_name
+    FROM teams t
+    JOIN users u ON t.created_by = u.id
+    WHERE t.id = $1
+  `, [teamId])
+  return result.rows[0]
+}
+
+exports.removeMember = async (teamId, userId) => {
+  const query = 'DELETE FROM team_members WHERE team_id = $1 AND user_id = $2';
+  await db.query(query, [teamId, userId]);
+}
+
 // create
 exports.createTeam = async (name, userId, description) => {
   const team = await db.query(
@@ -132,6 +147,13 @@ exports.removeMember = async (teamId, userId) => {
     `DELETE FROM team_members
      WHERE team_id = $1 AND user_id = $2`,
     [teamId, userId]
+  )
+}
+
+exports.updateMemberRole = async (teamId, userId, role) => {
+  await db.query(
+    `UPDATE team_members SET role = $1 WHERE team_id = $2 AND user_id = $3`,
+    [role, teamId, userId]
   )
 }
 

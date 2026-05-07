@@ -16,18 +16,20 @@
         <button class="btn">Save Changes</button>
     </form>
 </section>
-<section class="cardbox" id="member-section">
-    <h2>Assigned Members</h2>
-    <div id="claimed-member-list" data-team-id="<%= assignment.team_id %>" data-assign-id="<%= assignment.id %>">
-        <div class="flexlist"></div>
-        <p id="claimed-member-empty">No members have claimed this assignment.</p>
-    </div>
-</section>
-<section class="cardbox">
-    <h2>Edit Members</h2>
-    <div id="unclaimed-member-list" data-team-id="<%= assignment.team_id %>" data-assign-id="<%= assignment.id %>">
-        <div class="flexlist"></div>
-        <p id="unclaimed-member-empty">No members available to assign.</p>
-    </div>
-</section>
+<div class="member-columns">
+    <section class="cardbox" id="member-section">
+        <h2>Assigned Members</h2>
+        <div id="claimed-member-list" data-team-id="<%= assignment.team_id %>" data-assign-id="<%= assignment.id %>">
+            <div class="flexlist"></div>
+            <p id="claimed-member-empty">No members have claimed this assignment.</p>
+        </div>
+    </section>
+    <section class="cardbox">
+        <h2>Add Members</h2>
+        <div id="unclaimed-member-list" data-team-id="<%= assignment.team_id %>" data-assign-id="<%= assignment.id %>">
+            <div class="flexlist"></div>
+            <p id="unclaimed-member-empty">No members available to assign.</p>
+        </div>
+    </section>
+</div>
 <script src="/js/assignment-edit.js"></script>

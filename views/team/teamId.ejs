@@ -10,6 +10,8 @@
         <% if (team.role === 'Manager') { %>
             <button class="btn"><a href="/team/<%= team.id %>/assign/new">Assign Task</a></button>
             <button class="btn"><a href="/team/<%= team.id %>/edit">Edit Team</a></button>
+        <% } else if (isAdmin) { %>
+            <button class="btn"><a href="/team/<%= team.id %>/edit">Edit Team</a></button>
         <% } else { %>
             <button class="leave-btn" id="header-btn" onclick="leaveTeam()">
             <span class="leave-icon">↩</span>
@@ -74,4 +76,56 @@
     </section>    
 </section>
 </div>
+
+<!-- Leave Team Confirmation Modal -->
+<div class="modal-overlay" id="leave-modal">
+    <div class="modal-card">
+        <h3>Leave Team</h3>
+        <p>Are you sure you want to leave the team "<%= team.name %>"?</p>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeLeaveModal()">Cancel</button>
+            <button class="btn-confirm" onclick="confirmLeaveTeam()">Leave Team</button>
+        </div>
+    </div>
+</div>
+<script>
+    function leaveTeam() {
+        document.getElementById('leave-modal').style.display = 'flex';
+    }
+
+    function closeLeaveModal() {
+        document.getElementById('leave-modal').style.display = 'none';
+    }
+
+    async function confirmLeaveTeam() {
+        closeLeaveModal();
+
+        try {
+            const response = await fetch(`/api/team/<%= team.id %>/members/self`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                return alert(error.message || 'Unable to leave the team');
+            }
+
+            alert('Successfully left the team');
+            window.location.href = '/team';
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred. Please try again');
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('leave-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeLeaveModal();
+        }
+    });
+</script>
 <script src="/js/team-assignments.js"></script>
