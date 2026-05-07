@@ -1,0 +1,33 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+<link rel="stylesheet" href="/css/assignment.css">
+<h1>Edit Assignment</h1>
+<button class="btn" id="back-btn">Back to Assignment</button>
+<button class="btn" id="delete-btn">Delete Assignment</button>
+<section class="cardbox" id="assignment-edit-card">
+    <form id="assignment-edit-form" data-team-id="<%= assignment.team_id %>" data-assign-id="<%= assignment.id %>" action="/api/team/<%= assignment.team_id %>/assign/<%= assignment.id %>/edit" method="POST">
+        <input type="hidden" name="_method" value="PATCH" />
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" value="<%= assignment.title %>" />
+        <label for="description">Description</label>
+        <textarea id="description" name="description"><%= assignment.description %></textarea>
+        <label for="due_date">Due Date</label>
+        <input type="datetime-local" id="due_date" name="due_date" value="<%= new Date(assignment.due_date).toISOString().slice(0, 16) %>" />
+        <button class="btn">Save Changes</button>
+    </form>
+</section>
+<section class="cardbox" id="member-section">
+    <h2>Assigned Members</h2>
+    <div id="claimed-member-list" data-team-id="<%= assignment.team_id %>" data-assign-id="<%= assignment.id %>">
+        <div class="flexlist"></div>
+        <p id="claimed-member-empty">No members have claimed this assignment.</p>
+    </div>
+</section>
+<section class="cardbox">
+    <h2>Edit Members</h2>
+    <div id="unclaimed-member-list" data-team-id="<%= assignment.team_id %>" data-assign-id="<%= assignment.id %>">
+        <div class="flexlist"></div>
+        <p id="unclaimed-member-empty">No members available to assign.</p>
+    </div>
+</section>
+<script src="/js/assignment-edit.js"></script>

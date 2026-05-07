@@ -1,0 +1,347 @@
+.page-title {
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px #d0d0d0;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+#searchInput,
+.filter-btn {
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 14px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    background: #f2f2f2;
+    box-shadow: inset 0 0 0 1px #ccc;
+    display: flex;
+    align-items: center;
+}
+
+
+
+.filter-btn {
+    width: 180px;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.filter-wrapper {
+    position: relative;
+}
+
+.filter-menu {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    z-index: 10;
+}
+
+.filter-menu div {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.filter-menu div:hover {
+    background: #f0f0f0;
+}
+
+.hidden {
+    display: none;
+}
+
+.team-container {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: inset 0 0 0 1px #d6d6d6;
+}
+
+.team-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.team-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 16px 20px;
+    border-radius: 14px;
+    width: auto;
+    text-decoration: none;
+    color: black;
+
+    box-shadow: inset 0 0 0 1px #dcdcdc;
+    transition: 0.2s;
+}
+
+.team-card:hover {
+    background: #f0f0f0;
+}
+
+.team-card h2 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.team-card p {
+    font-size: 14px;
+    color: #555;
+    margin: 0;
+}
+
+#assignment-list{
+    width: 65%;
+    margin: 0;
+}
+
+/* Teamboard */
+.team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.team-header h1 {
+    font-size: 28px;
+    margin: 0;
+}
+
+.team-header p {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.leave-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 8px 18px;
+    border-radius: 999px;
+
+    border: none;
+    background: #f3f3f3;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: inset 0 0 0 1px #d0d0d0;
+    transition: 0.2s;
+}
+
+.leave-btn:hover {
+    background: #d54848;
+    color: #332423;
+}
+
+.leave-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 22px;
+    height: 22px;
+
+    border-radius: 50%;
+    background: #e0e0e0;
+
+    font-size: 13px;
+}
+
+.team-body {
+    display: flex;
+    gap: 20px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05),
+        inset 0 0 0 1px #e0e0e0;
+}
+
+.card.large {
+    flex: 2;
+}
+
+.team-body .card {
+    flex: 1;
+}
+
+.card-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.empty {
+    color: #999;
+    font-size: 14px;
+}
+
+.assignment {
+    padding: 12px;
+    border-radius: 12px;
+    background: #f5f5f5;
+    margin-top: 10px;
+}
+
+.member {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.member .avatar {
+    width: 54px;
+    height: 54px;
+    background: #444;
+    color: white;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-weight: 600;
+}
+
+.member p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.member span {
+    font-size: 14px;
+    color: #777;
+}
+
+.header-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 32px;
+    -webkit-box-orient: vertical;
+}
+
+.detail-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 58px;
+    -webkit-box-orient: vertical;
+}
+
+.header-with-icon #header-btn {
+    margin-left: auto;
+}
+
+.filter-sort {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+@media (max-width: 720px) {
+    .page {
+        padding: 18px;
+        padding: 0;
+    }
+
+    .page-title {
+        font-size: 24px;
+        margin-bottom: 14px;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    #searchInput, .filter-btn {
+        width: 100%;
+        line-height: 1;
+    }
+
+    .filter-btn {
+        justify-content: space-between;
+    }
+
+    .team-container {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .team-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 14px 16px;
+        width: auto;
+    }
+
+    .team-card h2 {
+        font-size: 16px;
+    }
+
+    .team-card p {
+        font-size: 13px;
+    }
+
+    .team-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .team-header h1 {
+        font-size: 22px;
+    }
+
+    .team-body {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .card-title {
+        font-size: 16px;
+    }
+
+    .member .avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 12px;
+    }
+
+    #assignment-list {
+        width: auto;
+        ;
+    }
+}
+

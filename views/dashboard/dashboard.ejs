@@ -1,0 +1,66 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+<link rel="stylesheet" href="/css/dashboard.css">
+<section>
+    <h1>Dashboard</h1>
+    <p>Welcome to your dashboard! Here you can manage your projects.</p>
+</section>
+<section class="cardbox" id="profile">
+    <% const avatarSrc = (data.user.avatar_hash && data.user.avatar_ext)
+      ? `/uploads/profiles/${data.user.avatar_hash}${data.user.avatar_ext}`
+            : '/default-avatar.png'; %>
+    <div>
+        <img src="<%= avatarSrc %>" alt="Profile Picture" class="profile-picture">
+        <h2>Hello, <%= data.user.firstname %> <%= data.user.lastname %></h2>
+    </div>
+    <div>
+        <form action="/logout" method="POST">
+            <button type="submit" class="btn">Log Out</button>
+        </form>
+        <form action="/account" method="GET">
+            <button type="submit" class="btn">Profile Settings</button>
+        </form>
+    </div>
+</section>
+<section class="cardbox" id="recent-teams">
+    <div id="heading-with-btn">
+        <h2>Recent Team</h2>
+        <a href="/team/create" class="btn">Create New Team</a>
+        <h3><a href="/team/">All Team ></a></h3>
+    </div>
+    
+    <% if (!data.teams || data.teams.length === 0) { %>
+        <p>No teams yet.</p>
+    <% } %>
+    <% (data.teams).forEach(team => { %>
+            <a href="/team/<%= team.id %>">
+      <div id="team-card">
+        <h3><%= team.name %></h3>
+        <p>Members </p>
+      <div id="team-members">
+            <% 
+                const members = data.teamMembers[team.id] || [];
+                const maxVisibleMembers = 3;
+                const visibleMembers = members.slice(0, maxVisibleMembers);
+                const overflowMembers = members.length - visibleMembers.length;
+                %>
+            <% visibleMembers.forEach(member => { 
+             const avatarSrc = (member.avatar_hash && member.avatar_ext)
+                ? `/uploads/profiles/${member.avatar_hash}${member.avatar_ext}`
+                : '/default-avatar.png';
+            %>
+          <img src="<%= avatarSrc %>" id="mini-avatar">
+        <% }) %>
+        <% if (overflowMembers > 0) { %>
+            <span class="member-overflow">+<%= overflowMembers %></span>
+        <% } %>
+      </div>
+      </div>
+            </a>
+    <% }) %>
+</section>
+<section class="cardbox" id="upcoming-assign">
+    <h2>Upcoming Assignment</h2>
+</section>
+<script src="/js/dashboard-script.js"></script>
+<%- include("../partials/footer") %>

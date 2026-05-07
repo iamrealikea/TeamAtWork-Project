@@ -1,0 +1,87 @@
+<%- include("../partials/header") %>
+  <%- include("../partials/navigation") %>
+
+    <link rel="stylesheet" href="/css/team.css">
+
+    <section class="page">
+
+      <div class="team-header">
+        <div>
+          <h1>
+            <%= team.name %>
+          </h1>
+          <p>
+            <%= members.length %> Member(s)
+          </p>
+        </div>
+
+        <button class="leave-btn" onclick="leaveTeam()">
+          <span class="leave-icon">↩</span>
+          <span>Leave</span>
+        </button>
+
+        <script>
+          function leaveTeam() {
+            window.location.href = "/team-test";
+          }
+        </script>
+      </div>
+
+      <div class="team-body">
+        <label for="search">Search Assignments:</label>
+        <input type="text" id="search">
+        <select id="filter">
+            <option value="all">All Assignment</option>
+            <option value="mine">My Assignment</option>
+        </select>
+        <select id="sort">
+            <option value="due-asc">Due Date (Soonest)</option>
+            <option value="due-desc">Due Date (Latest)</option>
+            <option value="title-asc">Title (A-Z)</option>
+            <option value="title-desc">Title (Z-A)</option>
+        </select>
+      <% const options = { year: 'numeric', month: 'long', day: 'numeric' }; %>
+        <div class="card large">
+          <% (assignments).forEach(assignment => { %>
+        <a href="/team/<%= team.id %>/assign/<%= assignment.id %>?action=view">
+        <div
+            id="team-card"
+            class="assignment-card"
+        >
+            <h3 class="header-text"><%= assignment.title %></h3>
+            <p class="detail-text"><%= assignment.description %></p>
+            <p>Due: <%= new Date(assignment.due_date).toLocaleDateString('en-TH', options) %></p>
+        </div>
+        </a>
+    <% }) %>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Members</h2>
+
+          <% members.forEach(m=> { %>
+            <% const avatarSrc = (m.avatar_hash && m.avatar_ext)
+                        ? `/uploads/profiles/${m.avatar_hash}${m.avatar_ext}`
+                        : '/default-avatar.png'; %>
+            <div class="member">
+              <div class="avatar">
+                <img src="<%= avatarSrc %>" alt="Profile Picture" class="avatar">
+              </div>
+              <div>
+                <p>
+                  <%= m.firstname %> <%= m.lastname %>
+                </p>
+                <span>
+                  <%= m.role %>
+                </span>
+              </div>
+            </div>
+            <% }) %>
+        </div>
+
+      </div>
+
+    </section>
+
+<script src="/js/team-assignments.js"></script>
+    <%- include("../partials/footer") %>

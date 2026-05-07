@@ -1,0 +1,133 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+<link rel="stylesheet" href="/css/team.css">
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+    }
+
+    .modal-card h3 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .modal-card p {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .modal-buttons button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+</style>
+
+<section>
+    <h1>Create New Team</h1>
+    <section class="cardbox">
+        <form id="create-team-form">
+            <div>
+                <label for="team-name">Team Name:</label>
+                <input type="text" id="team-name" name="name" placeholder="Enter team name" required>
+            </div>
+            <div>
+                <label for="team-description">Description:</label>
+                <textarea id="team-description" name="description" placeholder="Enter team description"></textarea>
+            </div>
+            <h3>Add Members</h3>
+            <div id="available-users">
+                <% users.forEach(user => { %>
+                    <% if (user.id !== currentUserId) { %>
+                        <label>
+                            <input type="checkbox" name="userIds" value="<%= user.id %>">
+                            <%= user.firstname %> <%= user.lastname %> (<%= user.email || user.username %>)
+                        </label>
+                    <% } %>
+                <% }) %>
+            </div>
+            <button type="submit" class="btn">Create Team</button>
+        </form>
+    </section>
+</section>
+
+<script>
+document.getElementById('create-team-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const name = formData.get('name');
+    const description = formData.get('description');
+    const selectedUsers = Array.from(document.querySelectorAll('input[name="userIds"]:checked')).map(cb => cb.value);
+
+    try {
+        // Create team
+        const teamResponse = await fetch('/api/teams', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, description })
+        });
+
+        if (!teamResponse.ok) {
+            const error = await teamResponse.json().catch(() => ({}));
+            alert(error.message || 'Failed to create team');
+            return;
+        }
+
+        const team = await teamResponse.json();
+
+        // Add members
+        if (selectedUsers.length > 0) {
+            const memberPromises = selectedUsers.map(userId =>
+                fetch(`/api/team/${team.id}/members`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, role: 'Member' })
+                })
+            );
+
+            const memberResults = await Promise.all(memberPromises);
+            const failed = memberResults.filter(r => !r.ok);
+            if (failed.length > 0) {
+                alert('Team created but some members could not be added');
+            }
+        }
+
+        alert('Team created successfully!');
+        window.location.href = `/team/${team.id}/edit`;
+    } catch (error) {
+        console.error(error);
+        alert('An error occurred. Please try again.');
+    }
+});
+</script>
+
+<%- include("../partials/footer") %></content>
+<parameter name="filePath">c:\Users\USER\Downloads\TeamAtWork-Project-point-3\TeamAtWork-Project-point-3\views\team\createTeam.ejs

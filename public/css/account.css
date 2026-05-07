@@ -1,0 +1,148 @@
+body {
+  background: #f3f3f3;
+}
+
+.page-title {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: black;
+  text-shadow: 2px 2px 4px #d0d0d0;
+}
+
+.grid {
+  display: flex;
+  gap: 20px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05),
+              inset 0 0 0 1px #d6d6d6;
+}
+
+.profile {
+  flex: 2;
+}
+
+.password {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; 
+}
+
+.profile-body {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 140px;
+  padding: 10px;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  background: #444;
+  color: white;
+  border-radius: 50%;
+  font-size: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.avatar-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  align-items: center;
+}
+
+.avatar-btns .btn {
+  width: 85%;
+  padding: 8px 0;
+}
+
+.right {
+  flex: 1;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 700px;
+}
+
+label {
+  font-size: 17px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 14px;
+  border: none;
+  background: #f2f2f2;
+  box-shadow: inset 0 0 0 1px #ccc;
+}
+
+.btn {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn.ghost {
+  background: #d3d3d3;
+}
+
+.btn.success {
+  background: #baf2c2;
+}
+
+.btn.danger {
+  background: #f3b6b6;
+}
+
+.action-right {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 15px;
+}
+
+.password-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;      
+  margin-top: 5px; 
+}
+
+.password-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+img.profile-picture {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0;
+}

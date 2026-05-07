@@ -1,0 +1,15 @@
+#heading-with-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#heading-with-btn a {
+    text-decoration: none;
+    color: #3a3a3a;
+    transition: 0.3s;
+}
+
+#heading-with-btn a:hover {
+    color: #7f7f7f;
+}
