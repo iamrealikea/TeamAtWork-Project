@@ -1,0 +1,331 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+<link rel="stylesheet" href="/css/team.css">
+
+<section class="page">
+    <div class="back-nav"><a href="/team/">&larr; Back to All Team</a></div>
+    <div class="header-with-icon">
+        <h1>Edit Team: <%= team.name %></h1>
+    </div>
+
+    <section class="cardbox">
+        <div class="card">
+            <h2>Team information</h2>
+            <p><strong>Name:</strong> <%= team.name %></p>
+            <p><strong>Description:</strong> <%= team.description || 'No description' %></p>
+            <p><strong>Team ID:</strong> <%= team.id %></p>
+            <% if (isAdmin) { %>
+                <p><em>Admin mode: you can add any user to this team.</em></p>
+            <% } else { %>
+                <p><em>Manager mode: you can add users to this team.</em></p>
+            <% } %>
+            <% if (isAdmin || team.role === 'Manager') { %>
+                <div style="margin-top: 1rem;">
+                    <button class="btn" style="background-color: #ffc107; color: black;" onclick="leaveTeam()">Leave Team</button>
+                    <button class="btn" style="background-color: #dc3545; color: white;" onclick="deleteTeam()">Delete Team</button>
+                </div>
+            <% } %>
+        </div>
+
+        <div style="display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap;">
+            <div class="cardbox" style="flex: 1 1 320px;">
+                <h2>Add users to team</h2>
+                <p>Select users from the database and click Add selected users.</p>
+                <form id="team-members-form">
+                    <% users.filter(user => !memberIds.includes(user.id)).forEach((user) => { %>
+                        <div class="team-member-row">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    name="userIds"
+                                    value="<%= user.id %>"
+                                />
+                                <span><%= user.firstname %> <%= user.lastname %> (<%= user.email || user.username %>)</span>
+                            </label>
+                        </div>
+                    <% }) %>
+                    <button type="button" class="btn" id="add-members-btn">Add selected users</button>
+                </form>
+            </div>
+
+            <div class="cardbox" style="flex: 1 1 320px;">
+                <h2>Current team members</h2>
+                <% if (members.length === 0) { %>
+                    <p>No members in this team yet.</p>
+                <% } %>
+                <% members.forEach((member) => { %>
+                    <% const avatarSrc = (member.avatar_hash && member.avatar_ext)
+                        ? `/uploads/profiles/${member.avatar_hash}${member.avatar_ext}`
+                        : '/default-avatar.png'; %>
+                    <div class="member" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center;">
+                            <div class="avatar">
+                                <img src="<%= avatarSrc %>" alt="<%= member.firstname %> avatar" class="avatar">
+                            </div>
+                            <div id="user-options">
+                                <p><%= member.firstname %> <%= member.lastname %></p>
+                                <% if (isAdmin || team.role === 'Manager') { %>
+                                    <div class="role-selection">
+                                        <label><input type="radio" name="role-<%= member.id %>" value="Manager" <%= member.role === 'Manager' ? 'checked' : '' %>> Manager</label>
+                                        <label><input type="radio" name="role-<%= member.id %>" value="Member" <%= member.role === 'Member' ? 'checked' : '' %>> Member</label>
+                                    </div>
+                                <% } else { %>
+                                    <span><%= member.role %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% if (isAdmin || (team.role === 'Manager' && member.id !== currentUserId)) { %>
+                            <button class="kick-btn" data-user-id="<%= member.id %>" data-name="<%= member.firstname %> <%= member.lastname %>">Kick</button>
+                        <% } %>
+                    </div>
+                <% }) %>
+                <% if (isAdmin || team.role === 'Manager') { %>
+                    <button type="button" class="btn" id="update-roles-btn">Update Roles</button>
+                <% } %>
+            </div>
+        </div>
+    </section>
+</section>
+
+<!-- Leave Team Confirmation Modal -->
+<div class="modal-overlay" id="leave-modal">
+    <div class="modal-card">
+        <h3>Leave Team</h3>
+        <p>Are you sure you want to leave the team "<%= team.name %>"?</p>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeLeaveModal()">Cancel</button>
+            <button class="btn-confirm" onclick="confirmLeaveTeam()">Leave Team</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Team Confirmation Modal -->
+<div class="modal-overlay" id="delete-modal">
+    <div class="modal-card">
+        <h3>Delete Team</h3>
+        <p>Are you sure you want to delete the team "<%= team.name %>"? This action cannot be undone.</p>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn-confirm" onclick="confirmDeleteTeam()">Delete Team</button>
+        </div>
+    </div>
+</div>
+
+<!-- Kick Member Confirmation Modal -->
+<div class="modal-overlay" id="kick-modal">
+    <div class="modal-card">
+        <h3>Kick Member</h3>
+        <p>Are you sure you want to kick <span id="kick-member-name"></span> from the team?</p>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeKickModal()">Cancel</button>
+            <button class="btn-confirm" onclick="confirmKickMember()">Kick Member</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const teamId = '<%= team.id %>';
+const addMembersButton = document.getElementById('add-members-btn');
+const statusEl = document.createElement('p');
+statusEl.id = 'team-edit-status';
+document.querySelector('.page').appendChild(statusEl);
+
+const showStatus = (message, isError = false) => {
+    statusEl.textContent = message;
+    statusEl.style.color = isError ? 'crimson' : 'green';
+};
+
+const addMembers = async () => {
+    const selectedInputs = Array.from(document.querySelectorAll('input[name="userIds"]:checked:not([disabled])'));
+    if (selectedInputs.length === 0) {
+        return showStatus('Please select users to add', true);
+    }
+
+    const results = await Promise.all(selectedInputs.map((input) => {
+        return fetch(`/api/team/${teamId}/members`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ userId: input.value, role: 'Member' })
+        });
+    }));
+
+    const failed = [];
+    for (const response of results) {
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            failed.push(data.message || 'Failed to add one or more users');
+        }
+    }
+
+    if (failed.length > 0) {
+        showStatus(failed.join('; '), true);
+        return;
+    }
+
+    showStatus('Members added successfully');
+    setTimeout(() => window.location.reload(), 1000);
+};
+
+addMembersButton.addEventListener('click', addMembers);
+
+// Leave Team functions
+function leaveTeam() {
+    document.getElementById('leave-modal').style.display = 'flex';
+}
+
+function closeLeaveModal() {
+    document.getElementById('leave-modal').style.display = 'none';
+}
+
+async function confirmLeaveTeam() {
+    closeLeaveModal();
+
+    try {
+        const response = await fetch(`/api/team/${teamId}/members/self`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            return alert(error.message || 'Unable to leave the team');
+        }
+
+        alert('Successfully left the team');
+        window.location.href = '/team';
+    } catch (error) {
+        console.error(error);
+        alert('An error occurred. Please try again');
+    }
+}
+
+// Delete Team functions
+function deleteTeam() {
+    document.getElementById('delete-modal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('delete-modal').style.display = 'none';
+}
+
+async function confirmDeleteTeam() {
+    closeDeleteModal();
+
+    try {
+        const response = await fetch(`/api/team/${teamId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            return alert(error.message || 'Unable to delete the team');
+        }
+
+        alert('Team deleted successfully');
+        window.location.href = '/team';
+    } catch (error) {
+        console.error(error);
+        alert('An error occurred. Please try again');
+    }
+}
+
+    const updateRolesButton = document.getElementById('update-roles-btn');
+    if (updateRolesButton) {
+        updateRolesButton.addEventListener('click', updateRoles);
+    }
+
+    async function updateRoles() {
+        const members = document.querySelectorAll('.member');
+        const promises = Array.from(members).map(async (memberEl) => {
+            const radios = memberEl.querySelectorAll('input[type="radio"]');
+            if (radios.length === 0) return; // not admin or manager
+            const userId = radios[0].name.split('-')[1];
+            const checkedRadio = memberEl.querySelector('input[type="radio"]:checked');
+            if (!checkedRadio) return;
+            const role = checkedRadio.value;
+            const response = await fetch(`/api/team/${teamId}/members/${userId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role })
+            });
+            if (!response.ok) {
+                throw new Error(`Failed to update role for user ${userId}`);
+            }
+        });
+        try {
+            await Promise.all(promises);
+            alert('Roles updated successfully');
+            location.reload();
+        } catch (error) {
+            console.error(error);
+            alert('Failed to update some roles');
+        }
+    }
+
+    // Kick member functionality
+    const kickButtons = document.querySelectorAll('.kick-btn');
+    kickButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const userId = btn.dataset.userId;
+            const memberName = btn.dataset.name;
+            document.getElementById('kick-member-name').textContent = memberName;
+            document.getElementById('kick-modal').dataset.userId = userId;
+            document.getElementById('kick-modal').style.display = 'flex';
+        });
+    });
+
+    function closeKickModal() {
+        document.getElementById('kick-modal').style.display = 'none';
+    }
+
+    async function confirmKickMember() {
+        const userId = document.getElementById('kick-modal').dataset.userId;
+        closeKickModal();
+
+        try {
+            const response = await fetch(`/api/team/${teamId}/members/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                alert('Member kicked successfully');
+                location.reload();
+            } else {
+                const error = await response.json().catch(() => ({}));
+                alert(error.message || 'Failed to kick member');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred. Please try again');
+        }
+    }
+
+// Close modals when clicking outside
+document.getElementById('leave-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeLeaveModal();
+    }
+});
+
+document.getElementById('delete-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+
+document.getElementById('kick-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeKickModal();
+    }
+});
+</script>

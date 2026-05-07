@@ -1,0 +1,131 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+<link rel="stylesheet" href="/css/team.css">
+
+<section class="page">
+    <div class="back-nav"><a href="/team/">&larr; Back to All Team</a></div>
+    <div class="header-with-icon">
+        <h1><%= team.name%></h1>
+        <div id="header-btn">
+        <% if (team.role === 'Manager') { %>
+            <button class="btn"><a href="/team/<%= team.id %>/assign/new">Assign Task</a></button>
+            <button class="btn"><a href="/team/<%= team.id %>/edit">Edit Team</a></button>
+        <% } else if (isAdmin) { %>
+            <button class="btn"><a href="/team/<%= team.id %>/edit">Edit Team</a></button>
+        <% } else { %>
+            <button class="leave-btn" id="header-btn" onclick="leaveTeam()">
+            <span class="leave-icon">↩</span>
+            <span>Leave</span>
+            </button>
+        <% } %>
+        </div>
+    </div>
+<div class="team-body">
+    <section class="cardbox" id="assignment-list">
+        <label for="search">Search Assignments:</label>
+        <input type="text" id="search">
+        <div class="filter-sort">
+            <select id="filter" class="filter-btn">
+                <option value="all">All Assignment</option>
+                <option value="mine">My Assignment</option>
+            </select>
+            <select id="sort" class="filter-btn">
+                <option value="due-asc">Due Date (Soonest)</option>
+                <option value="due-desc">Due Date (Latest)</option>
+                <option value="title-asc">Title (A-Z)</option>
+                <option value="title-desc">Title (Z-A)</option>
+            </select>
+        </div>
+        <% if (!assignments || assignments.length === 0) { %>
+            <p>No assignments yet.</p>
+        <% } %>
+        <% (assignments).forEach(assignment => { %>
+            <a href="/team/<%= team.id %>/assign/<%= assignment.id %>?action=view">
+            <div
+                id="team-card"
+                class="assignment-card"
+                data-title="<%= assignment.title %>"
+                data-due="<%= new Date(assignment.due_date).toISOString() %>"
+                data-mine="<%= assignment.isMine ? 'true' : 'false' %>"
+            >
+                <h3 class="header-text"><%= assignment.title %></h3>
+                <p class="detail-text"><%= assignment.description %></p>
+                <p>Due: <%= new Date(assignment.due_date).toLocaleDateString() %></p>
+            </div>
+            </a>
+        <% }) %>
+        
+    </section>
+    <section class="card">
+        <h2 class="card-title">Members</h2>
+
+        <% members.forEach(m=> { %>
+            <% const avatarSrc = (m.avatar_hash && m.avatar_ext)
+                        ? `/uploads/profiles/${m.avatar_hash}${m.avatar_ext}`
+                        : '/default-avatar.png'; %>
+            <div class="member">
+              <div class="avatar">
+                <img src="<%= avatarSrc %>" alt="Profile Picture" class="avatar">
+              </div>
+              <div>
+                <p><%= m.firstname %> <%= m.lastname %></p>
+                <span><%= m.role %></span>
+              </div>
+            </div>
+        <% }) %>
+    </section>    
+</section>
+</div>
+
+<!-- Leave Team Confirmation Modal -->
+<div class="modal-overlay" id="leave-modal">
+    <div class="modal-card">
+        <h3>Leave Team</h3>
+        <p>Are you sure you want to leave the team "<%= team.name %>"?</p>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeLeaveModal()">Cancel</button>
+            <button class="btn-confirm" onclick="confirmLeaveTeam()">Leave Team</button>
+        </div>
+    </div>
+</div>
+<script>
+    function leaveTeam() {
+        document.getElementById('leave-modal').style.display = 'flex';
+    }
+
+    function closeLeaveModal() {
+        document.getElementById('leave-modal').style.display = 'none';
+    }
+
+    async function confirmLeaveTeam() {
+        closeLeaveModal();
+
+        try {
+            const response = await fetch(`/api/team/<%= team.id %>/members/self`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                return alert(error.message || 'Unable to leave the team');
+            }
+
+            alert('Successfully left the team');
+            window.location.href = '/team';
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred. Please try again');
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('leave-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeLeaveModal();
+        }
+    });
+</script>
+<script src="/js/team-assignments.js"></script>

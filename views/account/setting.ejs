@@ -1,0 +1,225 @@
+<%- include("../partials/header") %>
+<%- include("../partials/navigation") %>
+
+<link rel="stylesheet" href="/css/account.css">
+
+<div class="page" data-user-id="<%= user?.id || '' %>">
+  <h1 class="page-title">Account Setting</h1>
+
+  <div class="grid">
+
+    <!-- LEFT CARD -->
+    <div class="card profile">
+
+      <div class="profile-body">
+
+        <!-- LEFT -->
+        <div class="left">
+          <div class="avatar">
+            <% const avatarSrc = (user?.avatar_hash && user?.avatar_ext)
+              ? `/uploads/profiles/${user.avatar_hash}${user.avatar_ext}`
+              : '/default-avatar.png'; %>
+            <img src="<%= avatarSrc %>" alt="Profile Picture" class="profile-picture" id="avatarPreview" data-default-src="/default-avatar.png">
+          </div>
+
+          <div class="avatar-btns">
+            <input type="file" id="avatarInput" accept="image/*" hidden>
+            <button class="btn ghost" type="button" id="avatarChangeBtn">Change</button>
+            <button class="btn ghost" type="button" id="avatarDeleteBtn">Delete</button>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="right">
+
+          <div class="form">
+            <label>Firstname</label>
+            <input type="text" id="firstnameInput" value="<%= user?.firstname || '' %>">
+
+            <label>Lastname</label>
+            <input type="text" id="lastnameInput" value="<%= user?.lastname || '' %>">
+
+            <label>Username</label>
+            <input type="text" id="usernameInput" value="<%= user?.username || '' %>">
+
+            <label>Email</label>
+            <input type="email" id="emailInput" value="<%= user?.email || '' %>">
+          </div>
+
+          <div class="action-right">
+            <button class="btn success" type="button" id="profileSaveBtn">Save Change</button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT CARD -->
+    <div class="card password">
+
+      <h2>Change Password</h2>
+
+      <div class="password-body">
+        <label>Current Password</label>
+        <input type="password">
+
+        <label>New Password</label>
+        <input type="password">
+      </div>
+
+      <div class="password-footer">
+        <button class="btn danger">Save Password</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const page = document.querySelector(".page[data-user-id]");
+    const preview = document.getElementById("avatarPreview");
+    const input = document.getElementById("avatarInput");
+    const changeBtn = document.getElementById("avatarChangeBtn");
+    const deleteBtn = document.getElementById("avatarDeleteBtn");
+    const saveBtn = document.getElementById("profileSaveBtn");
+    const firstnameInput = document.getElementById("firstnameInput");
+    const lastnameInput = document.getElementById("lastnameInput");
+    const usernameInput = document.getElementById("usernameInput");
+    const emailInput = document.getElementById("emailInput");
+
+    if (!page || !preview || !input || !changeBtn || !deleteBtn || !saveBtn || !firstnameInput || !lastnameInput || !usernameInput || !emailInput) {
+      return;
+    }
+
+    const showPopup = (message, variant = "info") => {
+      const existing = document.querySelector(".popup-overlay");
+      if (existing) existing.remove();
+
+      const overlay = document.createElement("div");
+      overlay.className = "popup-overlay";
+
+      const card = document.createElement("div");
+      card.className = `popup-card popup-card--${variant}`;
+      card.textContent = message;
+
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+
+      window.setTimeout(() => {
+        overlay.classList.add("popup-overlay--hide");
+      }, 1200);
+
+      window.setTimeout(() => {
+        overlay.remove();
+      }, 1600);
+    };
+
+    const userId = page.dataset.userId;
+    const defaultSrc = preview.dataset.defaultSrc || "/default-avatar.png";
+    let previewUrl = null;
+    let pendingFile = null;
+    let pendingDelete = false;
+
+    changeBtn.addEventListener("click", () => {
+      input.click();
+    });
+
+    input.addEventListener("change", () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        input.value = "";
+        return;
+      }
+
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
+      previewUrl = URL.createObjectURL(file);
+      preview.src = previewUrl;
+      pendingFile = file;
+      pendingDelete = false;
+    });
+
+    deleteBtn.addEventListener("click", () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        previewUrl = null;
+      }
+      preview.src = defaultSrc;
+      input.value = "";
+      pendingFile = null;
+      pendingDelete = true;
+    });
+
+    saveBtn.addEventListener("click", async () => {
+      if (!userId) return;
+
+      if (pendingFile) {
+        const formData = new FormData();
+        formData.append("avatar", pendingFile);
+
+        const response = await fetch(`/api/user/${userId}/avatar`, {
+          method: "POST",
+          body: formData
+        });
+
+        if (response.ok) {
+          pendingFile = null;
+          showPopup("Avatar updated.", "success");
+        } else {
+          const data = await response.json().catch(() => ({}));
+          const message = data?.error || data?.message || "Unable to update avatar.";
+          showPopup(message, "error");
+        }
+        return;
+      }
+
+      if (pendingDelete) {
+        const response = await fetch(`/api/user/${userId}/avatar`, {
+          method: "DELETE"
+        });
+
+        if (response.ok) {
+          pendingDelete = false;
+          showPopup("Avatar removed.", "success");
+        } else {
+          const data = await response.json().catch(() => ({}));
+          const message = data?.error || data?.message || "Unable to remove avatar.";
+          showPopup(message, "error");
+        }
+        return;
+      }
+
+      const payload = {
+        firstname: firstnameInput.value.trim(),
+        lastname: lastnameInput.value.trim(),
+        username: usernameInput.value.trim(),
+        email: emailInput.value.trim()
+      };
+
+      const response = await fetch(`/api/user/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        showPopup("Profile updated.", "success");
+      } else {
+        const data = await response.json().catch(() => ({}));
+        const message = data?.error || data?.message || "Unable to update profile.";
+        showPopup(message, "error");
+      }
+    });
+  });
+</script>
+
+<%- include("../partials/footer") %>

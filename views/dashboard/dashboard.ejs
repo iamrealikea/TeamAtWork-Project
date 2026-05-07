@@ -1,6 +1,6 @@
 <%- include("../partials/header") %>
 <%- include("../partials/navigation") %>
-
+<link rel="stylesheet" href="/css/dashboard.css">
 <section>
     <h1>Dashboard</h1>
     <p>Welcome to your dashboard! Here you can manage your projects.</p>
@@ -12,21 +12,35 @@
     <div>
         <img src="<%= avatarSrc %>" alt="Profile Picture" class="profile-picture">
         <h2>Hello, <%= data.user.firstname %> <%= data.user.lastname %></h2>
-    </div>
+    </div>    
     <div>
-        <form action="/logout" method="POST" style="display: inline;">
+        <% if (data.session.isAdmin) { %>
+        <div>
+            <form action="/admin" method="GET">
+                <button type="submit" class="btn">Admin Dashboard</button>
+            </form>
+        </div>
+    <% } %>
+        <form action="/logout" method="POST">
             <button type="submit" class="btn">Log Out</button>
         </form>
-        <button class="btn">Profile Settings</button>
+        <form action="/account" method="GET">
+            <button type="submit" class="btn">Profile Settings</button>
+        </form>
     </div>
 </section>
+<div class="large-container">
 <section class="cardbox" id="recent-teams">
-    <h2>Recent Team</h2>
+    <div id="heading-with-btn">
+        <h2>Recent Team</h2>
+        <h3><a href="/team/">All Team ></a></h3>
+    </div>
+    
     <% if (!data.teams || data.teams.length === 0) { %>
         <p>No teams yet.</p>
     <% } %>
     <% (data.teams).forEach(team => { %>
-            <a href="/teams/<%= team.id %>">
+            <a href="/team/<%= team.id %>">
       <div id="team-card">
         <h3><%= team.name %></h3>
         <p>Members </p>
@@ -54,6 +68,32 @@
 </section>
 <section class="cardbox" id="upcoming-assign">
     <h2>Upcoming Assignment</h2>
+    <% if (!data.assignment || data.assignment.length === 0) { %>
+        <p>No upcoming assignments.</p>
+    <% } else { %>
+            <% const upcomingAssignments = [...data.assignment].sort((a, b) => {
+                return new Date(a.due_date) - new Date(b.due_date);
+            }); %>
+            <% const now = new Date(); %>
+            <% const msPerDay = 24 * 60 * 60 * 1000; %>
+            <% upcomingAssignments.forEach(a => { %>
+                <% const dueDate = new Date(a.due_date); %>
+                <% const daysRemaining = Math.ceil((dueDate - now) / msPerDay); %>
+                <% let priorityClass = "priority-green"; %>
+                <% if (daysRemaining <= 2) { priorityClass = "priority-red"; }
+                   else if (daysRemaining <= 5) { priorityClass = "priority-orange"; }
+                   else if (daysRemaining <= 10) { priorityClass = "priority-yellow"; } %>
+                <a href="/team/<%= a.team_id %>/assign/<%= a.id %>?action=view">
+                <div id="assignment-card" class="<%= priorityClass %>">
+                    
+                    <h3><%= a.title %></h3>
+                    <p>Due: <%= new Date(a.due_date).toLocaleDateString() %></p>
+                    
+                </div>
+                </a>
+            <% }); %>
+                <% } %>
 </section>
+</div>
 <script src="/js/dashboard-script.js"></script>
 <%- include("../partials/footer") %>

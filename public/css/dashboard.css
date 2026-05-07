@@ -1,0 +1,52 @@
+#heading-with-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#heading-with-btn a {
+    text-decoration: none;
+    color: #3a3a3a;
+    transition: 0.3s;
+}
+
+#heading-with-btn a:hover {
+    color: #7f7f7f;
+}
+
+.large-container {
+    display: flex;
+
+    gap: 20px;
+}
+
+#upcoming-assign {
+    width: 40%;
+}
+
+#recent-teams {
+    width: 60%;
+}
+
+#assignment-card h3{
+    transition: 0.5s ease-in;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-height: 52px;
+}
+
+#assignment-card.priority-red {
+    background: linear-gradient(135deg, #f9f9f9, #ffc0c0);
+}
+
+#assignment-card.priority-orange {
+    background: linear-gradient(135deg, #f9f9f9, #ffd1a3);
+}
+
+#assignment-card.priority-yellow {
+    background: linear-gradient(135deg, #f9f9f9, #fbe39a);
+}
+
+#assignment-card.priority-green {
+    background: linear-gradient(135deg, #f9f9f9, #c4f3cf);
+}

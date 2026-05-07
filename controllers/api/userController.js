@@ -3,12 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const { AVATAR_DIR } = require('../../config/multer');
 
-// GET /users
-exports.getAllUsers = async (req, res) => {
-  const users = await User.getAll();
-  res.json(users);
-}
-
 // GET /users/:id
 exports.getMe = async (req, res) => {
   const user = await User.getById(req.params.id)
@@ -56,3 +50,32 @@ exports.updateAvatar = async (req, res) => {
     res.status(500).json({ message: 'Server error' })
   }
 }  
+
+exports.deleteAvatar = async (req, res) => {
+  const { id } = req.params
+  try {
+    const oldAvatar = await User.getAvatar(id)
+    if (!oldAvatar) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    if (oldAvatar.avatar_hash) {
+      const oldPath = path.join(AVATAR_DIR, `${oldAvatar.avatar_hash}${oldAvatar.avatar_ext}`)
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath)
+      }
+    }
+
+    await User.updateAvatar(id, null, null)
+    res.json({ message: 'Avatar removed successfully' })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+
+exports.getMyAssignments = async (req, res) => {
+  const userId = req.session.user.id
+  const assignments = await User.getMyAssignments(userId)
+  res.json(assignments)
+}
