@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const assignId = container.dataset.assignId;
   const claimBtn = document.getElementById('claim-assign');
   const abandonBtn = document.getElementById('abandon-assign');
+  const markBtn = document.getElementById('mark-assign');
 
   const renderEmpty = () => {
     emptyEl.style.display = 'block';
@@ -106,6 +107,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderFilePreview(fileInput.files);
     });
   }
+
+  if (dropzone.classList.contains('disabled')) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
+        dropzone.addEventListener(event, e => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
+}
 
   if (dropzone && fileInput) {
     const stopDefaults = (event) => {
@@ -200,6 +210,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (abandonBtn) {
     abandonBtn.addEventListener('click', () => handleClaimAction('unclaim'));
+  }
+
+  const handleMarkAssignment = async () => {
+    const label = markBtn?.textContent || '';
+    const isUnmark = label.toLowerCase().includes('unmark');
+    const nextStatus = isUnmark ? 'Pending' : 'Submitted';
+    try {
+      const response = await fetch(
+        `/api/team/${teamId}/assign/${assignId}/mark`,
+        {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status: nextStatus })
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const message = data?.error || data?.message || 'Unable to mark assignment.';
+        showPopup(message, 'error');
+        return;
+      }
+
+      const message = data?.message || (isUnmark
+        ? 'Assignment marked as pending.'
+        : 'Assignment marked as finished.');
+      showPopup(message, 'success', true);
+    } catch (error) {
+      showPopup('Unable to mark assignment.', 'error');
+      console.error('Error marking assignment:', error);
+    }
+  };
+
+  if (markBtn) {
+    markBtn.addEventListener('click', handleMarkAssignment);
   }
 
   const renderList = (files) => {

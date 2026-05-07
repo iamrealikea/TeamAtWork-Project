@@ -110,6 +110,22 @@ exports.deleteAssignment = async (req, res) => {
     return res.json({ message: 'Assignment deleted successfully' });
 }
 
+exports.markAssignment = async (req, res) => {
+    const sessionUserId = req.session?.user?.id;
+    const assignId = req.params.aId;
+    const { status } = req.body;
+    try {
+        const marked = await Assignment.markAssignment(assignId, sessionUserId, status);
+        if (!marked) {
+            return res.status(404).json({ error: 'Assignment not found' });
+        }
+        return res.json({ message: 'Assignment marked successfully' });
+    } catch (error) {
+        console.error('Error marking assignment:', error);
+        return res.status(500).json({ error: 'Failed to mark assignment' });
+    }
+}
+
 //For users to view and manage their files in assignment.
 exports.claimAssignment = async (req, res) => {
     const sessionUserId = req.session?.user?.id;

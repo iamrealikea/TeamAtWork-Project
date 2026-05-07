@@ -3,12 +3,20 @@
 <link rel="stylesheet" href="/css/team.css">
 
 <section class="page">
+    <div class="back-nav"><a href="/team/">&larr; Back to All Team</a></div>
     <div class="header-with-icon">
         <h1><%= team.name%></h1>
-        <button class="leave-btn" id="header-btn" onclick="leaveTeam()">
-          <span class="leave-icon">↩</span>
-          <span>Leave</span>
-        </button>
+        <div id="header-btn">
+        <% if (team.role === 'Manager') { %>
+            <button class="btn"><a href="/team/<%= team.id %>/assign/new">Assign Task</a></button>
+            <button class="btn"><a href="/team/<%= team.id %>/edit">Edit Team</a></button>
+        <% } else { %>
+            <button class="leave-btn" id="header-btn" onclick="leaveTeam()">
+            <span class="leave-icon">↩</span>
+            <span>Leave</span>
+            </button>
+        <% } %>
+        </div>
     </div>
 <div class="team-body">
     <section class="cardbox" id="assignment-list">

@@ -96,6 +96,12 @@
     color: #6a6a6a;
 }
 
+.file-dropzone.disabled {
+    pointer-events: none;  /* blocks mouse clicks & drag */
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .file-actions {
     display: flex;
     justify-content: flex-start;

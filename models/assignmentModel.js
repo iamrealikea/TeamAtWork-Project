@@ -4,15 +4,15 @@ const { nanoid } = require('nanoid');
 
 //Post Assignment
 exports.postAssignment = async (
-    title, description, team_id, created_by, due_date) => {
-    const id = nanoid(12);
+    title, description, team_id, created_by, due_date, genID) => {
+    
     const result = await db.query(
         `INSERT INTO assignments (title, description, team_id, created_by, due_date, id)
          VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *
-         ON CONFLICT (id) DO UPDATE SET`
+         `
          ,
-        [title, description, team_id, created_by, due_date, id]
+        [title, description, team_id, created_by, due_date, genID]
     )
     return result.rows;
 }
@@ -86,10 +86,29 @@ exports.claimAssignment = async (assignId, userId) => {
     return result.rowCount > 0;
 }
 
+exports.managerClaimAssignment = async (assignId, userId) => {
+    const result = await db.query(
+        `INSERT INTO user_assignments (user_id, assignment_id, status)
+         VALUES ($1, $2, 'Creator')
+         `,
+        [userId, assignId]
+    )
+    return result.rowCount > 0;
+}
+
 exports.unclaimAssignment = async (assignId, userId) => {
     const result = await db.query(
         `DELETE FROM user_assignments WHERE user_id = $1 AND assignment_id = $2`,
         [userId, assignId]
+    )
+    return result.rowCount > 0;
+}
+
+exports.markAssignment = async (assignId, userId, status) => {
+    const result = await db.query(
+        `UPDATE user_assignments SET status = $1, submitted_at = NOW() 
+        WHERE user_id = $2 AND assignment_id = $3`,
+        [status, userId, assignId]
     )
     return result.rowCount > 0;
 }

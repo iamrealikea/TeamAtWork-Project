@@ -1,5 +1,6 @@
 const Team = require('../../models/teamModel')
 const Assignment = require('../../models/assignmentModel')
+const { nanoid } = require('nanoid');
 
 
 const parsePositiveInt = (value) => {
@@ -43,6 +44,7 @@ exports.getTeamIdView = async (req, res) => {
             };
         })
     );
+    console.log(team, teamMember, assignmentsWithStatus)
     return res.render('team/teamId', { team, members: teamMember, assignments: assignmentsWithStatus });
 }
 
@@ -113,14 +115,27 @@ exports.postAssignment = async (req, res) => {
     const sessionUserId = req.session?.user?.id;
     const teamId = req.params.tId;
     const { title, description, due_date } = req.body;
+    let genID = nanoid(12);
+    
+    try {
+        let idValidation = await Assignment.getAssignmentById(genID);
+        if (idValidation) {
+            genID = nanoid(12);
+            idValidation = await Assignment.getAssignmentById(genID);
+        } 
+    } catch (error) {
+        console.error('Error validating assignment ID', error);
+        return res.status(500).redirect('error', { message: 'Internal server error. Please try again later.', statusCode: 500 });
+    }
+    
     const result = await Assignment.postAssignment(
-        title, description, teamId, sessionUserId, due_date
+        title, description, teamId, sessionUserId, due_date, genID
     )
+    const addManager = await Assignment.managerClaimAssignment(result[0].id, sessionUserId);
     const createdId = Array.isArray(result) ? result[0]?.id : result?.id;
     if (createdId) {
         return res.redirect(`/team/${teamId}/assign/${createdId}?action=view`);
     }
-    return res.redirect(`/team/${teamId}`);
 }
 
 exports.uploadFile = async (req, res) => {

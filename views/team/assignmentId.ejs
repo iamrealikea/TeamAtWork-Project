@@ -38,6 +38,8 @@
 
         const dueDateText = `${dueDateParts.weekday}, ${dueDateParts.day} ${dueDateParts.month} ${dueDateParts.year} at ${dueTimeText}`;
     %>
+    
+<div class="back-nav"><a href="/team/<%= assignment.team_id %>">&larr; Back to Team</a></div>
 <div class="header-with-icon">
     <div id="header-info">
         <img src="/icon/assignment.svg" alt="Assignment Icon" class="header-icon">
@@ -48,8 +50,9 @@
         <button class="btn" id="claim-assign">Claim Assignment</button>
     <% } else if (user.role === 'Manager') { %>
         <button class="btn" id="edit-assign">Edit Assignment</button>
+    <% } else if (status.status === 'Submitted') { %>
+            <button class="btn" id="mark-assign" >Unmark Submitted</button>
     <% } else { %>
-        
             <button class="btn" id="abandon-assign">Abandon Assignment</button>
             <button class="btn" id="mark-assign">Mark As Finish</button>
         
@@ -67,12 +70,14 @@
                         <p><b>Time remaining:</b> <%= timeRemainingText %></p>
                     <% } %>
                     <p><b>Status:</b>
-                        <% if (status?.status) { %>
-                            <%= status.status %>
-                        <% } else if (user.role === 'Manager') { %>
+                        <% if (user.role === 'Manager') { %>
                             <%= assignment.status %>
+                        <% } else if (status.status) { %>
+                            <%= status.status %>
+                        <% } else if (assignment.status === 'Closed') { %>
+                            Closed
                         <% } else { %>
-                            Unclaimed
+                            Unknown
                         <% } %>
                     </p>
                 </div>
@@ -89,22 +94,25 @@
             <% if (user.role === 'Manager') { %>
                 <p>For manager, Upload files will be visible to all team members.</p>
             <% } %>
-                <form id="submission-form" action="/api/team/<%= assignment.team_id %>/assign/<%= assignment.id %>/upload" method="post" enctype="multipart/form-data">
-                    <div class="file-picker">
-                        <input type="file" name="files" id="submissionFileInput" class="file-input-hidden" multiple required />
-                        <label for="submissionFileInput" class="file-dropzone" id="submissionDropzone">
-                            <div class="file-dropzone-title">Drag and drop files here</div>
-                            <div class="file-dropzone-subtitle">or click to choose files</div>
-                        </label>
-                        <div class="file-actions">
-                            <button type="button" class="btn file-clear-btn" id="submissionClearBtn">Clear</button>
-                        </div>
-                        <div class="file-preview" id="submissionFilePreview">
-                            <span class="file-preview-empty">No files chosen.</span>
-                        </div>
+            <% const isDisabled = (status.status === 'Unclaimed' || assignment.status === 'Closed'); %>
+
+            <form id="submission-form" action="/api/team/<%= assignment.team_id %>/assign/<%= assignment.id %>/upload" method="post" enctype="multipart/form-data">
+                <div class="file-picker">
+                    <input type="file" name="files" id="submissionFileInput" class="file-input-hidden" multiple required <%= isDisabled ? 'disabled' : '' %> />
+                    <label for="submissionFileInput" class="file-dropzone <%= isDisabled ? 'disabled' : '' %>" id="submissionDropzone">
+                        <div class="file-dropzone-title">Drag and drop files here</div>
+                        <div class="file-dropzone-subtitle">or click to choose files</div>
+                    </label>
+                    <div class="file-actions">
+                        <button type="button" class="btn file-clear-btn" id="submissionClearBtn"
+                            <%= isDisabled ? 'disabled' : '' %>>Clear</button>
                     </div>
-                    <button type="submit" class="btn" id="upload-btn">Upload Files</button>
-                </form>
+                    <div class="file-preview" id="submissionFilePreview">
+                        <span class="file-preview-empty">No files chosen.</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn" id="upload-btn" <%= isDisabled ? 'disabled' : '' %>>Upload Files</button>
+            </form>
             <div id="submission-files" data-team-id="<%= assignment.team_id %>" data-assign-id="<%= assignment.id %>">
                 <label>Uploaded Files:</label>
                 <div class="flexlist"></div>
